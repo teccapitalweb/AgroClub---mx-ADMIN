@@ -96,10 +96,9 @@
     <div class="footer-text">Solo personal autorizado de AgroClub MX</div>
   </div>
 
-  <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCa6zt7YD3QUzGxyPky0zPPfjQwhtYMeTw",
@@ -112,16 +111,10 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    // Si ya está logueado como admin, redirigir
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const adminDoc = await getDoc(doc(db, "admins", user.uid));
-        if (adminDoc.exists()) {
-          window.location.href = "panel.html";
-        }
-      }
+    // Si ya está logueado, redirigir directo al panel
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = "panel.html";
     });
 
     window.iniciarSesion = async function() {
@@ -140,21 +133,12 @@
       err.style.display = "none";
 
       try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        // Verificar que sea admin
-        const adminDoc = await getDoc(doc(db, "admins", result.user.uid));
-        if (!adminDoc.exists()) {
-          err.textContent = "No tienes permisos de administrador.";
-          err.style.display = "block";
-          btn.textContent = "Entrar al panel →";
-          btn.disabled = false;
-          return;
-        }
+        await signInWithEmailAndPassword(auth, email, password);
         window.location.href = "panel.html";
       } catch (e) {
         btn.textContent = "Entrar al panel →";
         btn.disabled = false;
-        err.textContent = "Correo o contraseña incorrectos.";
+        err.textContent = "Correo o contraseña incorrectos. Código: " + e.code;
         err.style.display = "block";
       }
     };
