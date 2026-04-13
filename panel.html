@@ -136,6 +136,62 @@
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--verde-claro); }
     .form-group textarea { resize: vertical; min-height: 80px; }
+
+    /* ══ SESIONES EN VIVO ══════════════════════════════════════════ */
+    .ses-card { background:#fff; border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; }
+    .ses-card-header { display:flex; align-items:center; gap:14px; margin-bottom:26px; padding-bottom:20px; border-bottom:1.5px solid var(--border); }
+    .ses-card-icon { width:46px; height:46px; background:linear-gradient(135deg,#1a6b2f,#52c97a); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .ses-card-title { font-size:1rem; font-weight:700; }
+    .ses-card-sub { font-size:.78rem; color:var(--muted); margin-top:2px; }
+    .ses-row { display:flex; gap:14px; margin-bottom:16px; flex-wrap:wrap; }
+    .ses-field { display:flex; flex-direction:column; gap:7px; flex:1; min-width:160px; }
+    .ses-field-wide { flex:2; }
+    .ses-label { font-size:.76rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+    .ses-input-wrap { display:flex; }
+    .ses-input { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:.88rem; font-family:var(--font); outline:none; transition:border-color .2s,box-shadow .2s; }
+    .ses-input:focus { border-color:var(--verde-claro); box-shadow:0 0 0 3px rgba(82,201,122,.12); }
+    .ses-btn { margin-top:18px; background:linear-gradient(135deg,var(--verde),var(--verde-claro)); color:#fff; border:none; border-radius:12px; padding:13px 28px; font-size:.92rem; font-weight:700; font-family:var(--font); cursor:pointer; display:flex; align-items:center; gap:8px; transition:opacity .2s,transform .15s; }
+    .ses-btn:hover { opacity:.9; transform:translateY(-1px); }
+
+    /* — Fecha + Hora row — */
+    .ses-datetime-row { display:flex; gap:14px; margin-bottom:16px; align-items:flex-start; flex-wrap:wrap; background:linear-gradient(135deg,#f0f7eb,#e8f5e0); border-radius:14px; padding:18px; border:1.5px solid #d0e8c8; }
+
+    /* — Picker genérico — */
+    .ses-picker-block { position:relative; display:flex; flex-direction:column; gap:7px; min-width:160px; }
+    .ses-picker-label { font-size:.76rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+    .ses-picker-display { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:11px 16px; background:#fff; border:2px solid #c5ddb8; border-radius:12px; cursor:pointer; font-size:.9rem; font-weight:600; color:var(--verde); user-select:none; transition:border-color .2s,box-shadow .2s; min-width:160px; }
+    .ses-picker-display:hover { border-color:var(--verde-claro); box-shadow:0 0 0 3px rgba(82,201,122,.1); }
+    .ses-picker-dropdown { display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:200; background:#fff; border:1.5px solid var(--border); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.14); min-width:260px; overflow:hidden; animation:_dropIn .15s ease; }
+    .ses-picker-dropdown.open { display:block; }
+    @keyframes _dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* — Calendario — */
+    .cal-nav { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; }
+    .cal-nav span { font-size:.92rem; font-weight:700; color:var(--text); }
+    .cal-nav button { background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--verde); font-weight:700; padding:2px 8px; border-radius:6px; transition:background .15s; }
+    .cal-nav button:hover { background:var(--bg); }
+    .cal-dias-header { display:grid; grid-template-columns:repeat(7,1fr); padding:0 10px 6px; }
+    .cal-dias-header span { text-align:center; font-size:.72rem; font-weight:700; color:var(--muted); }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); padding:0 10px 14px; gap:3px; }
+    .cal-day { text-align:center; padding:7px 2px; border-radius:8px; font-size:.83rem; cursor:pointer; font-weight:500; transition:background .15s,color .15s; }
+    .cal-day:hover:not(.cal-empty):not(.cal-pasado) { background:rgba(82,201,122,.15); color:var(--verde); }
+    .cal-day.cal-hoy { border:2px solid var(--verde-claro); color:var(--verde); font-weight:700; }
+    .cal-day.cal-sel { background:var(--verde); color:#fff !important; font-weight:700; border-radius:8px; }
+    .cal-day.cal-empty, .cal-day.cal-pasado { color:#ccc; cursor:default; }
+    .cal-day.cal-pasado:hover { background:none; }
+
+    /* — Hora picker — */
+    .hora-picker-inner { display:flex; align-items:center; gap:4px; padding:16px 16px 10px; }
+    .hora-col { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .hora-col-label { font-size:.72rem; font-weight:700; color:var(--muted); }
+    .hora-scroll { display:flex; flex-direction:column; gap:2px; max-height:168px; overflow-y:auto; scrollbar-width:none; }
+    .hora-scroll::-webkit-scrollbar { display:none; }
+    .hora-item { padding:7px 18px; border-radius:8px; font-size:.88rem; font-weight:500; cursor:pointer; text-align:center; transition:background .15s,color .15s; }
+    .hora-item:hover { background:rgba(82,201,122,.15); color:var(--verde); }
+    .hora-item.sel { background:var(--verde); color:#fff; font-weight:700; }
+    .hora-sep { font-size:1.4rem; font-weight:700; color:var(--verde); padding-bottom:4px; }
+    .ampm-scroll { gap:6px; }
+    .hora-confirm { width:calc(100% - 32px); margin:0 16px 14px; background:var(--verde); color:#fff; border:none; border-radius:10px; padding:9px; font-size:.85rem; font-weight:700; font-family:var(--font); cursor:pointer; }
     .form-full { grid-column: 1 / -1; }
 
     /* ── STATS PAGE ── */
@@ -554,16 +610,110 @@
     <!-- SESIONES ADMIN -->
     <div class="page" id="page-sesiones-admin">
       <div class="page-header"><h2>🔴 Sesiones en vivo</h2></div>
-      <div class="content-form">
-        <h3>➕ Programar nueva sesión</h3>
-        <div class="form-grid">
-          <div class="form-group"><label>Título de la sesión</label><input type="text" placeholder="Ej: Q&A Bioinsumos con Ing. García"></div>
-          <div class="form-group"><label>Instructor</label><input type="text" placeholder="Ing. García"></div>
-          <div class="form-group"><label>Fecha</label><input type="date" id="m-vence"></div>
-          <div class="form-group"><label>Hora</label><input type="time"></div>
-          <div class="form-group form-full"><label>Link de Zoom / Meet</label><input type="text" placeholder="https://zoom.us/j/..."></div>
+
+      <div class="ses-card">
+        <div class="ses-card-header">
+          <div class="ses-card-icon">📡</div>
+          <div>
+            <div class="ses-card-title">Nueva sesión en vivo</div>
+            <div class="ses-card-sub">Se notificará a todos los miembros activos</div>
+          </div>
         </div>
-        <button class="btn-add">✅ Programar sesión</button>
+
+        <!-- Título + Instructor -->
+        <div class="ses-row">
+          <div class="ses-field ses-field-wide">
+            <div class="ses-label">🎤 Título de la sesión</div>
+            <div class="ses-input-wrap">
+              <input id="ses-titulo" type="text" class="ses-input" placeholder="Ej: Q&A Bioinsumos con Ing. García">
+            </div>
+          </div>
+          <div class="ses-field">
+            <div class="ses-label">👨‍🏫 Instructor</div>
+            <div class="ses-input-wrap">
+              <input id="ses-instructor" type="text" class="ses-input" placeholder="Ing. García">
+            </div>
+          </div>
+        </div>
+
+        <!-- Fecha + Hora (pickers custom) -->
+        <div class="ses-datetime-row">
+
+          <!-- FECHA PICKER -->
+          <div class="ses-picker-block" id="bloque-fecha">
+            <div class="ses-picker-label">📅 Fecha</div>
+            <div class="ses-picker-display" id="fecha-display" onclick="togglePicker('fecha')">
+              <span id="fecha-texto">Seleccionar fecha</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <input type="hidden" id="ses-fecha">
+            <div class="ses-picker-dropdown" id="picker-fecha">
+              <div class="cal-nav">
+                <button onclick="cambiarMes(-1)">‹</button>
+                <span id="cal-mes-label"></span>
+                <button onclick="cambiarMes(1)">›</button>
+              </div>
+              <div class="cal-dias-header">
+                <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
+          </div>
+
+          <!-- HORA PICKER -->
+          <div class="ses-picker-block" id="bloque-hora">
+            <div class="ses-picker-label">🕐 Hora</div>
+            <div class="ses-picker-display" id="hora-display" onclick="togglePicker('hora')">
+              <span id="hora-texto">Seleccionar hora</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <input type="hidden" id="ses-hora">
+            <div class="ses-picker-dropdown" id="picker-hora">
+              <div class="hora-picker-inner">
+                <div class="hora-col">
+                  <div class="hora-col-label">Hora</div>
+                  <div class="hora-scroll" id="hora-scroll"></div>
+                </div>
+                <div class="hora-sep">:</div>
+                <div class="hora-col">
+                  <div class="hora-col-label">Min</div>
+                  <div class="hora-scroll" id="min-scroll"></div>
+                </div>
+                <div class="hora-col">
+                  <div class="hora-col-label">&nbsp;</div>
+                  <div class="hora-scroll ampm-scroll" id="ampm-scroll">
+                    <div class="hora-item" onclick="selAmPm('AM')">AM</div>
+                    <div class="hora-item" onclick="selAmPm('PM')">PM</div>
+                  </div>
+                </div>
+              </div>
+              <button class="hora-confirm" onclick="confirmarHora()">✔ Confirmar</button>
+            </div>
+          </div>
+
+          <!-- LINK -->
+          <div class="ses-field ses-field-wide">
+            <div class="ses-label">🔗 Link de acceso</div>
+            <div class="ses-input-wrap">
+              <input id="ses-link" type="text" class="ses-input" placeholder="https://zoom.us/j/... o Meet o WhatsApp">
+            </div>
+          </div>
+        </div>
+
+        <button class="ses-btn" onclick="programarSesion()">
+          <span>📡</span> Programar sesión en vivo
+        </button>
+      </div>
+
+      <!-- TABLA -->
+      <div class="table-card">
+        <div class="table-header"><h3>📅 Sesiones programadas</h3></div>
+        <table>
+          <thead><tr><th>Título</th><th>Instructor</th><th>Fecha y hora</th><th>Link</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-sesiones">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No hay sesiones programadas aún</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -719,6 +869,144 @@ auth.onAuthStateChanged(function(user) {
     }
   });
 });
+
+// ══ PICKERS CUSTOM ══════════════════════════════════════════════════════════
+var _calFecha = { anio: new Date().getFullYear(), mes: new Date().getMonth() };
+var _selHora = { h: null, m: null, ampm: 'AM' };
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function togglePicker(tipo) {
+  var id = 'picker-' + tipo;
+  var el = document.getElementById(id);
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.ses-picker-dropdown').forEach(function(d){ d.classList.remove('open'); });
+  if (!isOpen) {
+    el.classList.add('open');
+    if (tipo === 'fecha') renderCalendario();
+    if (tipo === 'hora') renderHoraPicker();
+  }
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ses-picker-block')) {
+    document.querySelectorAll('.ses-picker-dropdown').forEach(function(d){ d.classList.remove('open'); });
+  }
+});
+
+function cambiarMes(delta) {
+  _calFecha.mes += delta;
+  if (_calFecha.mes > 11) { _calFecha.mes = 0; _calFecha.anio++; }
+  if (_calFecha.mes < 0)  { _calFecha.mes = 11; _calFecha.anio--; }
+  renderCalendario();
+}
+
+function renderCalendario() {
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var label = document.getElementById('cal-mes-label');
+  label.textContent = MESES[_calFecha.mes] + ' ' + _calFecha.anio;
+  var grid = document.getElementById('cal-grid');
+  var primerDia = new Date(_calFecha.anio, _calFecha.mes, 1);
+  var diasEnMes = new Date(_calFecha.anio, _calFecha.mes + 1, 0).getDate();
+  var inicioSemana = (primerDia.getDay() + 6) % 7; // Lu=0
+  var selVal = document.getElementById('ses-fecha').value;
+  var html = '';
+  for (var i = 0; i < inicioSemana; i++) html += '<div class="cal-day cal-empty"></div>';
+  for (var d = 1; d <= diasEnMes; d++) {
+    var thisDate = new Date(_calFecha.anio, _calFecha.mes, d);
+    var yyyy = _calFecha.anio;
+    var mm = String(_calFecha.mes+1).padStart(2,'0');
+    var dd = String(d).padStart(2,'0');
+    var val = yyyy+'-'+mm+'-'+dd;
+    var cls = 'cal-day';
+    if (thisDate < hoy) cls += ' cal-pasado';
+    else if (thisDate.toDateString() === hoy.toDateString()) cls += ' cal-hoy';
+    if (val === selVal) cls += ' cal-sel';
+    html += '<div class="'+cls+'" onclick="selFecha(\''+val+'\')">'+d+'</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function selFecha(val) {
+  document.getElementById('ses-fecha').value = val;
+  var p = val.split('-');
+  var d = new Date(p[0], p[1]-1, p[2]);
+  document.getElementById('fecha-texto').textContent = d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('fecha-display').style.color = 'var(--verde)';
+  renderCalendario();
+  document.getElementById('picker-fecha').classList.remove('open');
+}
+
+function renderHoraPicker() {
+  var hs = document.getElementById('hora-scroll');
+  var ms = document.getElementById('min-scroll');
+  var html = '';
+  for (var h = 1; h <= 12; h++) {
+    var sel = _selHora.h === h ? ' sel' : '';
+    html += '<div class="hora-item'+sel+'" onclick="selHora('+h+')">'+String(h).padStart(2,'0')+'</div>';
+  }
+  hs.innerHTML = html;
+  html = '';
+  [0,5,10,15,20,25,30,35,40,45,50,55].forEach(function(m){
+    var sel = _selHora.m === m ? ' sel' : '';
+    html += '<div class="hora-item'+sel+'" onclick="selMin('+m+')">'+String(m).padStart(2,'0')+'</div>';
+  });
+  ms.innerHTML = html;
+  document.querySelectorAll('#ampm-scroll .hora-item').forEach(function(el){
+    el.classList.toggle('sel', el.textContent === _selHora.ampm);
+  });
+}
+
+function selHora(h) { _selHora.h = h; renderHoraPicker(); }
+function selMin(m)  { _selHora.m = m; renderHoraPicker(); }
+function selAmPm(v) { _selHora.ampm = v; renderHoraPicker(); }
+
+function confirmarHora() {
+  if (_selHora.h === null || _selHora.m === null) { showToast('⚠️ Elige hora y minutos','error'); return; }
+  var h24 = _selHora.ampm === 'PM' ? (_selHora.h === 12 ? 12 : _selHora.h + 12) : (_selHora.h === 12 ? 0 : _selHora.h);
+  var val = String(h24).padStart(2,'0') + ':' + String(_selHora.m).padStart(2,'0');
+  document.getElementById('ses-hora').value = val;
+  document.getElementById('hora-texto').textContent = String(_selHora.h).padStart(2,'0') + ':' + String(_selHora.m).padStart(2,'0') + ' ' + _selHora.ampm;
+  document.getElementById('hora-display').style.color = 'var(--verde)';
+  document.getElementById('picker-hora').classList.remove('open');
+}
+
+// ── Sesiones Firebase ────────────────────────────────────────────────────────
+function programarSesion() {
+  var titulo     = (document.getElementById('ses-titulo').value||'').trim();
+  var instructor = (document.getElementById('ses-instructor').value||'').trim();
+  var fecha      = document.getElementById('ses-fecha').value;
+  var hora       = document.getElementById('ses-hora').value;
+  var link       = (document.getElementById('ses-link').value||'').trim();
+  if (!titulo||!fecha||!hora) { showToast('⚠️ Título, fecha y hora son obligatorios','error'); return; }
+  db.collection('sesiones').add({ titulo:titulo, instructor:instructor, fechaHora:fecha+'T'+hora, link:link, fecha:new Date().toISOString() })
+    .then(function(){
+      showToast('✅ Sesión programada — los miembros ya pueden verla');
+      ['ses-titulo','ses-instructor','ses-link'].forEach(function(id){ document.getElementById(id).value=''; });
+      document.getElementById('ses-fecha').value=''; document.getElementById('ses-hora').value='';
+      document.getElementById('fecha-texto').textContent='Seleccionar fecha';
+      document.getElementById('hora-texto').textContent='Seleccionar hora';
+      _selHora = {h:null,m:null,ampm:'AM'};
+    });
+}
+function eliminarSesion(id) {
+  if (!confirm('¿Eliminar esta sesión?')) return;
+  db.collection('sesiones').doc(id).delete().then(function(){ showToast('Sesión eliminada'); });
+}
+db.collection('sesiones').orderBy('fechaHora').onSnapshot(function(snap) {
+  var tbody = document.getElementById('tbody-sesiones');
+  if (!tbody) return;
+  if (snap.empty) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No hay sesiones programadas aún</td></tr>'; return; }
+  var ahora = new Date();
+  tbody.innerHTML = snap.docs.map(function(d){
+    var s=d.data(); var dt=new Date(s.fechaHora);
+    var esHoy=dt.toDateString()===ahora.toDateString(), pasada=dt<ahora;
+    var estado=pasada?'<span class="status-badge status-vencido">Finalizada</span>':esHoy?'<span class="status-badge status-activo">🔴 Hoy</span>':'<span class="status-badge status-pendiente">Próxima</span>';
+    var fechaStr=dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+dt.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    var linkBtn=s.link?'<a href="'+s.link+'" target="_blank"><button class="btn-accion btn-ver-a">Abrir</button></a>':'<span style="color:var(--muted);font-size:.8rem;">Sin link</span>';
+    return '<tr><td><div class="member-name">'+(s.titulo||'—')+'</div></td><td>'+(s.instructor||'—')+'</td><td>'+fechaStr+'</td><td>'+linkBtn+'</td><td>'+estado+'</td><td><div class="action-btns"><button class="btn-accion btn-desactivar" onclick="eliminarSesion(\''+d.id+'\')">Eliminar</button></div></td></tr>';
+  }).join('');
+});
+// ════════════════════════════════════════════════════════════════════════════
 
 // ── Miembros en tiempo real ───────────────────────────────────────────────────
 db.collection('miembros').onSnapshot(function(snap) {
