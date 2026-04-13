@@ -736,8 +736,8 @@ onAuthStateChanged(_auth, async (user) => {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -749,9 +749,33 @@ const firebaseConfig = {
   appId: "1:231737548143:web:6651621c2cbad8a31a9c9a"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// ── Toast helper ─────────────────────────────────────────────────────────────
+window.showToast = function(msg, tipo = "success") {
+  const old = document.getElementById("_toast");
+  if (old) old.remove();
+  const t = document.createElement("div");
+  t.id = "_toast";
+  t.textContent = msg;
+  t.style.cssText = `
+    position:fixed;bottom:28px;right:28px;z-index:9999;
+    padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;
+    color:#fff;box-shadow:0 4px 18px rgba(0,0,0,0.22);
+    background:${tipo === "error" ? "#dc2626" : "#16a34a"};
+    animation:_tFade .25s ease;pointer-events:none;`;
+  if (!document.getElementById("_toastStyle")) {
+    const s = document.createElement("style");
+    s.id = "_toastStyle";
+    s.textContent = `@keyframes _tFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`;
+    document.head.appendChild(s);
+  }
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+};
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── MIEMBROS en tiempo real ──
 onSnapshot(collection(db, "miembros"), (snap) => {
@@ -856,27 +880,6 @@ function loadCursos() {
     </tr>`).join("");
   });
 }
-
-// ── Toast helper ────────────────────────────────────────────────────────────
-window.showToast = function(msg, tipo = "success") {
-  const existing = document.getElementById("_toast");
-  if (existing) existing.remove();
-  const t = document.createElement("div");
-  t.id = "_toast";
-  t.textContent = msg;
-  t.style.cssText = `
-    position:fixed;bottom:28px;right:28px;z-index:9999;
-    padding:12px 20px;border-radius:10px;font-size:14px;font-weight:500;
-    color:#fff;box-shadow:0 4px 18px rgba(0,0,0,0.22);
-    background:${tipo === "error" ? "#dc2626" : "#16a34a"};
-    animation:_fadeIn .25s ease;pointer-events:none;`;
-  const style = document.createElement("style");
-  style.textContent = `@keyframes _fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`;
-  document.head.appendChild(style);
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3200);
-};
-// ────────────────────────────────────────────────────────────────────────────
 
 window.crearCurso = async function() {
   const titulo = document.getElementById("curso-titulo")?.value.trim();
