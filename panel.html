@@ -197,9 +197,7 @@
       <div class="sidebar-item" onclick="showPage('cursos-admin', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">🎓</span> Cursos</div>
       </div>
-      <div class="sidebar-item" onclick="showPage('videos-admin', this)">
-        <div class="sidebar-item-left"><span class="sidebar-item-icon">🎬</span> Videos sueltos</div>
-      </div>
+
       <div class="sidebar-item" onclick="showPage('pdfs-admin', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">📄</span> PDFs</div>
       </div>
@@ -527,37 +525,7 @@
       </div>
     </div>
 
-    <!-- VIDEOS ADMIN -->
-    <div class="page" id="page-videos-admin">
-      <div class="page-header"><h2>🎬 Gestión de Videos</h2></div>
-      <div class="content-form">
-        <h3>➕ Agregar nuevo video</h3>
-        <div class="form-grid">
-          <div class="form-group"><label>Título del video</label><input type="text" placeholder="Ej: Hidroponia NFT para producción comercial"></div>
-          <div class="form-group"><label>Instructor</label><input type="text" id="vid-instructor" placeholder="Ej: Ing. Martínez"></div>
-          <div class="form-group"><label>URL del video (YouTube)</label><input type="text" id="vid-url" placeholder="https://youtube.com/watch?v=..."></div>
-          <div class="form-group"><label>Duración</label><input type="text" id="vid-duracion" placeholder="Ej: 25 min"></div>
-          <div class="form-group"><label>Categoría</label>
-            <select id="vid-categoria"><option>Producción</option><option>Bioinsumos</option><option>IA Agrícola</option><option>Gestión</option></select>
-          </div>
-          <div class="form-group"><label>Mes</label>
-            <select id="vid-mes"><option>Abril 2026</option><option>Mayo 2026</option></select>
-          </div>
-        </div>
-        <button class="btn-add" onclick="publicarVideo()">✅ Publicar video</button>
-      </div>
-      <div class="table-card">
-        <div class="table-header"><h3>Videos publicados (19)</h3></div>
-        <table>
-          <thead><tr><th>Título</th><th>Instructor</th><th>Categoría</th><th>Mes</th><th>Vistas</th><th>Acciones</th></tr></thead>
-          <tbody>
-            <tr><td>Hidroponia NFT para producción comercial</td><td>Ing. Martínez</td><td>Producción</td><td>Abril 2026</td><td>38</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
-            <tr><td>Manejo de biofertilizantes en maíz</td><td>Ing. Ramírez</td><td>Bioinsumos</td><td>Abril 2026</td><td>21</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
-            <tr><td>IA aplicada al diagnóstico de plagas</td><td>Ing. Torres</td><td>IA Agrícola</td><td>Abril 2026</td><td>15</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+
 
     <!-- PDFs ADMIN -->
     <div class="page" id="page-pdfs-admin">
@@ -783,18 +751,7 @@ function agregarMiembro() {
     .then(function(){ showToast('✅ Miembro agregado exitosamente'); closeModal(); });
 }
 
-// ── Videos ───────────────────────────────────────────────────────────────────
-function publicarVideo() {
-  var titulo     = document.getElementById('vid-titulo').value.trim();
-  var instructor = document.getElementById('vid-instructor').value.trim();
-  var url        = document.getElementById('vid-url').value.trim();
-  var duracion   = document.getElementById('vid-duracion').value.trim();
-  var categoria  = document.getElementById('vid-categoria').value;
-  var mes        = document.getElementById('vid-mes').value;
-  if (!titulo || !url) { showToast('⚠️ Título y URL son obligatorios','error'); return; }
-  db.collection('videos').add({ titulo:titulo, instructor:instructor, url:url, duracion:duracion, categoria:categoria, mes:mes, fecha: new Date().toISOString() })
-    .then(function(){ showToast('✅ Video publicado — ya aparece en el portal VIP'); document.getElementById('vid-titulo').value=''; document.getElementById('vid-url').value=''; });
-}
+
 
 // ── PDFs ─────────────────────────────────────────────────────────────────────
 function publicarPDF() {
