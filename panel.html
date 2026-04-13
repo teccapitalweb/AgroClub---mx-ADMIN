@@ -194,8 +194,11 @@
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Contenido</div>
+      <div class="sidebar-item" onclick="showPage('cursos-admin', this)">
+        <div class="sidebar-item-left"><span class="sidebar-item-icon">🎓</span> Cursos</div>
+      </div>
       <div class="sidebar-item" onclick="showPage('videos-admin', this)">
-        <div class="sidebar-item-left"><span class="sidebar-item-icon">🎬</span> Videos</div>
+        <div class="sidebar-item-left"><span class="sidebar-item-icon">🎬</span> Videos sueltos</div>
       </div>
       <div class="sidebar-item" onclick="showPage('pdfs-admin', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">📄</span> PDFs</div>
@@ -360,7 +363,7 @@
         <div class="table-header"><h3>3 solicitudes pendientes</h3></div>
         <table>
           <thead><tr><th>Nombre</th><th>Email</th><th>WhatsApp</th><th>Solicitud</th><th>Acciones</th></tr></thead>
-          <tbody id="tbody-pendientes">
+          <tbody>
             <tr>
               <td><div class="member-name">Laura P. Torres</div></td>
               <td>laura@correo.mx</td><td>+52 777 123 4567</td><td>9 Abril 2026</td>
@@ -376,6 +379,149 @@
               <td>claudia@campo.mx</td><td>+52 664 345 6789</td><td>7 Abril 2026</td>
               <td><div class="action-btns"><button class="btn-accion btn-activar" onclick="aprobarMiembro(this)">✅ Aprobar</button><button class="btn-accion btn-desactivar">❌ Rechazar</button></div></td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CURSOS ADMIN -->
+    <div class="page" id="page-cursos-admin">
+      <div class="page-header">
+        <h2>🎓 Gestión de Cursos</h2>
+        <p>Crea y administra los cursos del portal VIP</p>
+      </div>
+
+      <!-- FORM NUEVO CURSO -->
+      <div class="content-form" style="margin-bottom:24px;">
+        <h3>➕ Crear nuevo curso</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título del curso</label>
+            <input type="text" id="curso-titulo" placeholder="Ej: Producción de Maíz">
+          </div>
+          <div class="form-group">
+            <label>Emoji / Ícono</label>
+            <input type="text" id="curso-emoji" placeholder="🌽" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select id="curso-categoria">
+              <option>Producción</option>
+              <option>Agronomía</option>
+              <option>Bioinsumos</option>
+              <option>IA Agrícola</option>
+              <option>Gestión</option>
+              <option>Sanidad Vegetal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Color del curso</label>
+            <input type="color" id="curso-color" value="#1a6b2f" style="height:42px;padding:4px;">
+          </div>
+          <div class="form-group form-full">
+            <label>Descripción</label>
+            <textarea id="curso-desc" placeholder="Describe el contenido del curso..." style="min-height:80px;"></textarea>
+          </div>
+        </div>
+        <button class="btn-add" onclick="crearCurso()">✅ Crear curso</button>
+      </div>
+
+      <!-- LISTA DE CURSOS -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Cursos publicados</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Curso</th>
+              <th>Categoría</th>
+              <th>Clases</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-cursos">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No hay cursos creados aún</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DETALLE CURSO ADMIN -->
+    <div class="page" id="page-detalle-curso-admin">
+      <div class="page-header">
+        <button onclick="showPage('cursos-admin', document.querySelector('[onclick*=cursos-admin]')); " style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:16px;">← Volver a cursos</button>
+        <h2 id="detalle-curso-titulo">Clases del curso</h2>
+        <p style="color:var(--muted);font-size:.88rem;" id="detalle-curso-desc"></p>
+      </div>
+
+      <!-- AGREGAR CLASE -->
+      <div class="content-form" style="margin-bottom:24px;">
+        <h3>➕ Agregar clase</h3>
+        <input type="hidden" id="clase-curso-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título de la clase</label>
+            <input type="text" id="clase-titulo" placeholder="Ej: Introducción y preparación del suelo">
+          </div>
+          <div class="form-group">
+            <label>Número de clase</label>
+            <input type="number" id="clase-num" placeholder="1" min="1">
+          </div>
+          <div class="form-group form-full">
+            <label>Link de Google Drive del video</label>
+            <input type="text" id="clase-drive-url" placeholder="https://drive.google.com/file/d/XXXXXXXX/view">
+            <small style="color:var(--muted);font-size:.75rem;margin-top:4px;display:block;">Asegúrate que el video sea público ("Cualquier persona con el link")</small>
+          </div>
+        </div>
+        <button class="btn-add" onclick="agregarClase()">✅ Agregar clase</button>
+      </div>
+
+      <!-- AGREGAR MATERIAL -->
+      <div class="content-form" style="margin-bottom:24px;">
+        <h3>📁 Agregar material de apoyo</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del material</label>
+            <input type="text" id="mat-titulo" placeholder="Ej: Guía de fertirrigación">
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="mat-tipo">
+              <option>PDF</option>
+              <option>PowerPoint</option>
+              <option>Word</option>
+              <option>Excel</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label>Link de Google Drive</label>
+            <input type="text" id="mat-url" placeholder="https://drive.google.com/file/d/XXXXXXXX/view">
+          </div>
+        </div>
+        <button class="btn-add" onclick="agregarMaterial()">✅ Agregar material</button>
+      </div>
+
+      <!-- LISTA CLASES -->
+      <div class="table-card" style="margin-bottom:16px;">
+        <div class="table-header"><h3>📹 Clases</h3></div>
+        <table>
+          <thead><tr><th>#</th><th>Título</th><th>Drive ID</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-clases-admin">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No hay clases aún</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- LISTA MATERIALES -->
+      <div class="table-card">
+        <div class="table-header"><h3>📁 Materiales</h3></div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Tipo</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-materiales-admin">
+            <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No hay materiales aún</td></tr>
           </tbody>
         </table>
       </div>
@@ -404,7 +550,7 @@
         <div class="table-header"><h3>Videos publicados (19)</h3></div>
         <table>
           <thead><tr><th>Título</th><th>Instructor</th><th>Categoría</th><th>Mes</th><th>Vistas</th><th>Acciones</th></tr></thead>
-          <tbody id="tbody-videos">
+          <tbody>
             <tr><td>Hidroponia NFT para producción comercial</td><td>Ing. Martínez</td><td>Producción</td><td>Abril 2026</td><td>38</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
             <tr><td>Manejo de biofertilizantes en maíz</td><td>Ing. Ramírez</td><td>Bioinsumos</td><td>Abril 2026</td><td>21</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
             <tr><td>IA aplicada al diagnóstico de plagas</td><td>Ing. Torres</td><td>IA Agrícola</td><td>Abril 2026</td><td>15</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
@@ -429,7 +575,7 @@
         <div class="table-header"><h3>PDFs publicados (8)</h3></div>
         <table>
           <thead><tr><th>Título</th><th>Páginas</th><th>Descargas</th><th>Mes</th><th>Acciones</th></tr></thead>
-          <tbody id="tbody-pdfs">
+          <tbody>
             <tr><td>Guía de fertirrigación en chile serrano</td><td>8</td><td>34</td><td>Abril 2026</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
             <tr><td>Checklist de manejo integrado de plagas</td><td>3</td><td>41</td><td>Abril 2026</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
           </tbody>
@@ -563,7 +709,35 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+const _app = initializeApp({
+  apiKey: "AIzaSyCa6zt7YD3QUzGxyPky0zPPfjQwhtYMeTw",
+  authDomain: "agroclub-mx.firebaseapp.com",
+  projectId: "agroclub-mx",
+  storageBucket: "agroclub-mx.firebasestorage.app",
+  messagingSenderId: "231737548143",
+  appId: "1:231737548143:web:6651621c2cbad8a31a9c9a"
+});
+const _auth = getAuth(_app);
+const _db = getFirestore(_app);
+
+onAuthStateChanged(_auth, async (user) => {
+  if (!user) { window.location.href = "index.html"; return; }
+  const adminDoc = await getDoc(doc(_db, "admins", user.uid));
+  if (!adminDoc.exists()) { 
+    alert("No tienes permisos de administrador.");
+    signOut(_auth);
+    window.location.href = "index.html"; 
+    return; 
+  }
+});
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -579,98 +753,40 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// ── AUTH CHECK ──
-onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = "index.html"; return; }
-  const adminDoc = await getDoc(doc(db, "admins", user.uid));
-  if (!adminDoc.exists()) {
-    alert("No tienes permisos de administrador.");
-    signOut(auth);
-    window.location.href = "index.html";
-    return;
-  }
-  initAdmin();
+// ── MIEMBROS en tiempo real ──
+onSnapshot(collection(db, "miembros"), (snap) => {
+  const total = snap.docs.length;
+  const activos = snap.docs.filter(d => d.data().estado === "activo").length;
+  const pendientes = snap.docs.filter(d => d.data().estado === "pendiente").length;
+  const el = document.querySelector("#page-dashboard .stats-row .stat-num");
+  if (el) el.textContent = activos;
 });
 
-function initAdmin() {
-  loadMiembros();
-  loadVideos();
-  loadPDFs();
-  loadStats();
-}
+// ── PUBLICAR VIDEO ──
+window.publicarVideo = async function() {
+  const titulo = document.getElementById("vid-titulo").value.trim();
+  const instructor = document.getElementById("vid-instructor").value.trim();
+  const url = document.getElementById("vid-url").value.trim();
+  const duracion = document.getElementById("vid-duracion").value.trim();
+  const categoria = document.getElementById("vid-categoria").value;
+  const mes = document.getElementById("vid-mes").value;
+  if (!titulo || !url) { alert("Título y URL son obligatorios"); return; }
+  await addDoc(collection(db, "videos"), { titulo, instructor, url, duracion, categoria, mes, fecha: new Date().toISOString() });
+  alert("✅ Video publicado — ya aparece en el portal VIP");
+  document.getElementById("vid-titulo").value = "";
+  document.getElementById("vid-url").value = "";
+};
 
-// ══════════════════════════════════════
-// ── MIEMBROS EN TIEMPO REAL ──
-// ══════════════════════════════════════
-function loadMiembros() {
-  onSnapshot(collection(db, "miembros"), (snap) => {
-    const miembros = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const activos = miembros.filter(m => m.estado === "activo").length;
-    const pendientes = miembros.filter(m => m.estado === "pendiente").length;
-
-    // Update dashboard stats
-    const statNums = document.querySelectorAll(".stat-num");
-    if (statNums[0]) statNums[0].textContent = activos;
-
-    // Update sidebar badges
-    const badges = document.querySelectorAll(".s-badge");
-    if (badges[0]) badges[0].textContent = activos;
-    if (badges[1]) badges[1].textContent = pendientes;
-    if (badges[1]) badges[1].style.background = pendientes > 0 ? "var(--naranja)" : "var(--verde-claro)";
-
-    // Render miembros table
-    renderMiembros(miembros);
-    renderPendientes(miembros.filter(m => m.estado === "pendiente"));
-  });
-}
-
-function renderMiembros(miembros) {
-  const tbody = document.getElementById("tbody-miembros");
-  if (!tbody) return;
-  if (miembros.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No hay miembros registrados aún</td></tr>';
-    return;
-  }
-  tbody.innerHTML = miembros.map(m => {
-    const statusClass = m.estado === "activo" ? "status-activo" : m.estado === "pendiente" ? "status-pendiente" : "status-vencido";
-    const statusLabel = m.estado === "activo" ? "✅ Activo" : m.estado === "pendiente" ? "⏳ Pendiente" : "❌ Vencido";
-    return `<tr>
-      <td><div class="member-name">${m.nombre || "—"}</div><div class="member-email">${m.email || "—"}</div></td>
-      <td>${m.whatsapp || "—"}</td>
-      <td>${m.plan || "VIP"}</td>
-      <td>${m.vence || "—"}</td>
-      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-      <td><div class="action-btns">
-        ${m.estado !== "activo" ? `<button class="btn-accion btn-activar" onclick="cambiarEstado('${m.id}','activo')">✅ Activar</button>` : `<button class="btn-accion btn-desactivar" onclick="cambiarEstado('${m.id}','inactivo')">❌ Desactivar</button>`}
-      </div></td>
-    </tr>`;
-  }).join("");
-}
-
-function renderPendientes(pendientes) {
-  const tbody = document.getElementById("tbody-pendientes");
-  if (!tbody) return;
-  if (pendientes.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">✅ Sin pendientes por aprobar</td></tr>';
-    return;
-  }
-  tbody.innerHTML = pendientes.map(m => `<tr>
-    <td><div class="member-name">${m.nombre || "—"}</div></td>
-    <td>${m.email || "—"}</td>
-    <td>${m.whatsapp || "—"}</td>
-    <td>${m.fechaRegistro ? new Date(m.fechaRegistro).toLocaleDateString("es-MX") : "—"}</td>
-    <td><div class="action-btns">
-      <button class="btn-accion btn-activar" onclick="cambiarEstado('${m.id}','activo')">✅ Aprobar</button>
-      <button class="btn-accion btn-desactivar" onclick="cambiarEstado('${m.id}','rechazado')">❌ Rechazar</button>
-    </div></td>
-  </tr>`).join("");
-}
-
-// ── CAMBIAR ESTADO ──
-window.cambiarEstado = async function(id, estado) {
-  await updateDoc(doc(db, "miembros", id), { estado });
-  const msg = estado === "activo" ? "✅ Miembro activado — ya puede acceder al portal VIP" : estado === "rechazado" ? "❌ Solicitud rechazada" : "⏸ Miembro desactivado";
-  showToast(msg);
+// ── PUBLICAR PDF ──
+window.publicarPDF = async function() {
+  const titulo = document.getElementById("pdf-titulo").value.trim();
+  const paginas = document.getElementById("pdf-paginas").value;
+  const url = document.getElementById("pdf-url").value.trim();
+  if (!titulo || !url) { alert("Título y URL son obligatorios"); return; }
+  await addDoc(collection(db, "pdfs"), { titulo, paginas, url, fecha: new Date().toISOString() });
+  alert("✅ PDF publicado — ya aparece en el portal VIP");
+  document.getElementById("pdf-titulo").value = "";
+  document.getElementById("pdf-url").value = "";
 };
 
 // ── AGREGAR MIEMBRO ──
@@ -679,178 +795,197 @@ window.agregarMiembro = async function() {
   const email = document.getElementById("m-email").value.trim();
   const whatsapp = document.getElementById("m-wa").value.trim();
   const vence = document.getElementById("m-vence").value;
-  if (!nombre || !email) { showToast("⚠️ Nombre y email son obligatorios", "error"); return; }
-  await addDoc(collection(db, "miembros"), {
-    nombre, email, whatsapp,
-    vence: vence ? new Date(vence).toLocaleDateString("es-MX", {day:"numeric",month:"long",year:"numeric"}) : "—",
-    estado: "activo", plan: "VIP Mensual",
-    fechaRegistro: new Date().toISOString()
-  });
-  showToast("✅ Miembro agregado y activado");
+  if (!nombre || !email) { alert("Nombre y email son obligatorios"); return; }
+  await addDoc(collection(db, "miembros"), { nombre, email, whatsapp, vence, estado: "activo", plan: "VIP Mensual", fechaRegistro: new Date().toISOString() });
+  alert("✅ Miembro agregado exitosamente");
   closeModal();
 };
 
-// ══════════════════════════════════════
-// ── VIDEOS ──
-// ══════════════════════════════════════
-function loadVideos() {
-  onSnapshot(query(collection(db, "videos"), orderBy("fecha", "desc")), (snap) => {
-    const videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+// ── CARGAR MIEMBROS EN TABLA ──
+onSnapshot(collection(db, "miembros"), (snap) => {
+  const tbody = document.getElementById("tbody-miembros");
+  if (!tbody) return;
+  tbody.innerHTML = snap.docs.map(d => {
+    const m = d.data();
+    const statusClass = m.estado === "activo" ? "status-activo" : m.estado === "pendiente" ? "status-pendiente" : "status-vencido";
+    const statusLabel = m.estado === "activo" ? "✅ Activo" : m.estado === "pendiente" ? "⏳ Pendiente" : "❌ Vencido";
+    return `<tr>
+      <td><div class="member-name">${m.nombre}</div><div class="member-email">${m.email}</div></td>
+      <td>${m.whatsapp||"—"}</td>
+      <td>${m.plan||"VIP"}</td>
+      <td>${m.vence||"—"}</td>
+      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+      <td><div class="action-btns">
+        <button class="btn-accion btn-activar" onclick="cambiarEstado('${d.id}','activo')">Activar</button>
+        <button class="btn-accion btn-desactivar" onclick="cambiarEstado('${d.id}','inactivo')">Desactivar</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+});
 
-    // Update stats
-    const statNums = document.querySelectorAll(".stat-num");
-    if (statNums[2]) statNums[2].textContent = videos.length;
+// ── CAMBIAR ESTADO MIEMBRO ──
+window.cambiarEstado = async function(id, estado) {
+  await updateDoc(doc(db, "miembros", id), { estado });
+  alert("Estado actualizado: " + estado);
+};
 
-    // Render table
-    const tbody = document.getElementById("tbody-videos");
+
+// ══════════════════════════════════════
+// ── CURSOS ──
+// ══════════════════════════════════════
+let cursoActivoId = null;
+
+function loadCursos() {
+  onSnapshot(collection(db, "cursos"), (snap) => {
+    const cursos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const tbody = document.getElementById("tbody-cursos");
     if (!tbody) return;
-    if (videos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No hay videos publicados aún</td></tr>';
+    if (cursos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No hay cursos creados aún</td></tr>';
       return;
     }
-    tbody.innerHTML = videos.map(v => `<tr>
-      <td>${v.titulo}</td>
-      <td>${v.instructor || "—"}</td>
-      <td>${v.categoria || "—"}</td>
-      <td>${v.mes || "—"}</td>
-      <td>${v.vistas || 0}</td>
+    tbody.innerHTML = cursos.map(c => `<tr>
+      <td><div class="member-name">${c.emoji || "🎓"} ${c.titulo}</div></td>
+      <td>${c.categoria || "—"}</td>
+      <td>${c.clases?.length || 0} clases</td>
+      <td><span class="status-badge status-activo">✅ Publicado</span></td>
       <td><div class="action-btns">
-        <a href="${v.url}" target="_blank" class="btn-accion btn-ver-a">Ver</a>
-        <button class="btn-accion btn-desactivar" onclick="eliminarVideo('${v.id}')">Eliminar</button>
+        <button class="btn-accion btn-ver-a" onclick="abrirDetalleCurso('${c.id}')">Gestionar</button>
+        <button class="btn-accion btn-desactivar" onclick="eliminarCurso('${c.id}')">Eliminar</button>
       </div></td>
     </tr>`).join("");
   });
 }
 
-window.publicarVideo = async function() {
-  const titulo = document.getElementById("vid-titulo")?.value.trim();
-  const instructor = document.getElementById("vid-instructor")?.value.trim();
-  const url = document.getElementById("vid-url")?.value.trim();
-  const duracion = document.getElementById("vid-duracion")?.value.trim();
-  const categoria = document.getElementById("vid-categoria")?.value;
-  const mes = document.getElementById("vid-mes")?.value;
-  if (!titulo || !url) { showToast("⚠️ Título y URL son obligatorios", "error"); return; }
-  await addDoc(collection(db, "videos"), {
-    titulo, instructor, url, duracion, categoria, mes,
-    fecha: new Date().toISOString(), vistas: 0, nuevo: true
+window.crearCurso = async function() {
+  const titulo = document.getElementById("curso-titulo")?.value.trim();
+  const emoji = document.getElementById("curso-emoji")?.value.trim() || "🎓";
+  const categoria = document.getElementById("curso-categoria")?.value;
+  const color = document.getElementById("curso-color")?.value;
+  const desc = document.getElementById("curso-desc")?.value.trim();
+  if (!titulo) { showToast("⚠️ El título es obligatorio", "error"); return; }
+  const ref = await addDoc(collection(db, "cursos"), {
+    titulo, emoji, categoria, color, descripcion: desc,
+    clases: [], materiales: [],
+    fecha: new Date().toISOString()
   });
-  showToast("✅ Video publicado — ya aparece en el portal VIP");
-  document.getElementById("vid-titulo").value = "";
-  document.getElementById("vid-url").value = "";
-  document.getElementById("vid-instructor").value = "";
-  document.getElementById("vid-duracion").value = "";
+  showToast("✅ Curso creado — ya aparece en el portal VIP");
+  document.getElementById("curso-titulo").value = "";
+  document.getElementById("curso-desc").value = "";
+  document.getElementById("curso-emoji").value = "";
 };
 
-window.eliminarVideo = async function(id) {
-  if (!confirm("¿Eliminar este video?")) return;
-  await deleteDoc(doc(db, "videos", id));
-  showToast("Video eliminado");
+window.eliminarCurso = async function(id) {
+  if (!confirm("¿Eliminar este curso y todas sus clases?")) return;
+  await deleteDoc(doc(db, "cursos", id));
+  showToast("Curso eliminado");
 };
 
-// ══════════════════════════════════════
-// ── PDFs ──
-// ══════════════════════════════════════
-function loadPDFs() {
-  onSnapshot(query(collection(db, "pdfs"), orderBy("fecha", "desc")), (snap) => {
-    const pdfs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const tbody = document.getElementById("tbody-pdfs");
-    if (!tbody) return;
-    if (pdfs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No hay PDFs publicados aún</td></tr>';
-      return;
-    }
-    tbody.innerHTML = pdfs.map(p => `<tr>
-      <td>${p.titulo}</td>
-      <td>${p.paginas || "—"}</td>
-      <td>${p.descargas || 0}</td>
-      <td>${p.fecha ? new Date(p.fecha).toLocaleDateString("es-MX") : "—"}</td>
-      <td><div class="action-btns">
-        <a href="${p.url}" target="_blank" class="btn-accion btn-ver-a">Ver</a>
-        <button class="btn-accion btn-desactivar" onclick="eliminarPDF('${p.id}')">Eliminar</button>
-      </div></td>
-    </tr>`).join("");
-  });
+window.abrirDetalleCurso = async function(id) {
+  cursoActivoId = id;
+  document.getElementById("clase-curso-id").value = id;
+  const cursoDoc = await getDoc(doc(db, "cursos", id));
+  const curso = { id, ...cursoDoc.data() };
+  document.getElementById("detalle-curso-titulo").textContent = `${curso.emoji || "🎓"} ${curso.titulo}`;
+  document.getElementById("detalle-curso-desc").textContent = curso.descripcion || "";
+  renderClasesAdmin(curso.clases || []);
+  renderMaterialesAdmin(curso.materiales || []);
+  showPage("detalle-curso-admin", null);
+};
+
+function renderClasesAdmin(clases) {
+  const tbody = document.getElementById("tbody-clases-admin");
+  if (!tbody) return;
+  if (clases.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No hay clases aún</td></tr>';
+    return;
+  }
+  const sorted = [...clases].sort((a,b) => a.num - b.num);
+  tbody.innerHTML = sorted.map(cl => `<tr>
+    <td><strong>${cl.num}</strong></td>
+    <td>${cl.titulo}</td>
+    <td style="font-size:.75rem;color:var(--muted);">${cl.driveId || "—"}</td>
+    <td><button class="btn-accion btn-desactivar" onclick="eliminarClase('${cl.num}')">Eliminar</button></td>
+  </tr>`).join("");
 }
 
-window.publicarPDF = async function() {
-  const titulo = document.getElementById("pdf-titulo")?.value.trim();
-  const paginas = document.getElementById("pdf-paginas")?.value;
-  const url = document.getElementById("pdf-url")?.value.trim();
-  if (!titulo || !url) { showToast("⚠️ Título y URL son obligatorios", "error"); return; }
-  await addDoc(collection(db, "pdfs"), {
-    titulo, paginas, url,
-    fecha: new Date().toISOString(), descargas: 0
-  });
-  showToast("✅ PDF publicado — ya aparece en el portal VIP");
-  document.getElementById("pdf-titulo").value = "";
-  document.getElementById("pdf-url").value = "";
-  document.getElementById("pdf-paginas").value = "";
-};
-
-window.eliminarPDF = async function(id) {
-  if (!confirm("¿Eliminar este PDF?")) return;
-  await deleteDoc(doc(db, "pdfs", id));
-  showToast("PDF eliminado");
-};
-
-// ══════════════════════════════════════
-// ── ESTADÍSTICAS REALES ──
-// ══════════════════════════════════════
-async function loadStats() {
-  // Miembros
-  onSnapshot(collection(db, "miembros"), (snap) => {
-    const total = snap.docs.length;
-    const activos = snap.docs.filter(d => d.data().estado === "activo").length;
-    const pendientes = snap.docs.filter(d => d.data().estado === "pendiente").length;
-
-    // Ingresos estimados
-    const ingresos = activos * 200;
-
-    const statNums = document.querySelectorAll(".stat-num");
-    if (statNums[0]) statNums[0].textContent = activos;
-    if (statNums[1]) statNums[1].textContent = "$" + ingresos.toLocaleString("es-MX");
-    if (statNums[3]) statNums[3].textContent = pendientes;
-
-    // Stats page bars
-    const barActivos = document.getElementById("bar-activos");
-    const barPendientes = document.getElementById("bar-pendientes");
-    if (barActivos) barActivos.style.width = Math.min((activos / 100) * 100, 100) + "%";
-    if (barPendientes) barPendientes.style.width = Math.min((pendientes / 10) * 100, 100) + "%";
-  });
-
-  // Videos count
-  onSnapshot(collection(db, "videos"), (snap) => {
-    const statNums = document.querySelectorAll(".stat-num");
-    if (statNums[2]) statNums[2].textContent = snap.docs.length;
-  });
+function renderMaterialesAdmin(materiales) {
+  const tbody = document.getElementById("tbody-materiales-admin");
+  if (!tbody) return;
+  if (materiales.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No hay materiales aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = materiales.map((m,i) => `<tr>
+    <td>${m.titulo}</td>
+    <td>${m.tipo}</td>
+    <td><a href="${m.url}" target="_blank"><button class="btn-accion btn-ver-a">Ver</button></a>
+    <button class="btn-accion btn-desactivar" onclick="eliminarMaterial(${i})">Eliminar</button></td>
+  </tr>`).join("");
 }
 
-// ══════════════════════════════════════
-// ── TOAST NOTIFICATIONS ──
-// ══════════════════════════════════════
-function showToast(msg, type = "success") {
-  const existing = document.getElementById("toast-msg");
-  if (existing) existing.remove();
-  const toast = document.createElement("div");
-  toast.id = "toast-msg";
-  toast.textContent = msg;
-  toast.style.cssText = `
-    position:fixed;bottom:24px;right:24px;z-index:9999;
-    background:${type === "error" ? "#ef4444" : "#1a6b2f"};
-    color:#fff;padding:14px 20px;border-radius:12px;
-    font-size:.88rem;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;
-    box-shadow:0 8px 24px rgba(0,0,0,.2);
-    animation:slideUp .3s ease;
-  `;
-  const style = document.createElement("style");
-  style.textContent = "@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}";
-  document.head.appendChild(style);
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-}
+window.agregarClase = async function() {
+  const id = document.getElementById("clase-curso-id").value;
+  const titulo = document.getElementById("clase-titulo").value.trim();
+  const num = parseInt(document.getElementById("clase-num").value);
+  const driveUrl = document.getElementById("clase-drive-url").value.trim();
+  if (!titulo || !driveUrl) { showToast("⚠️ Título y link son obligatorios", "error"); return; }
+  
+  // Extract Drive ID from URL
+  const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const driveId = match ? match[1] : driveUrl;
+  
+  const cursoDoc = await getDoc(doc(db, "cursos", id));
+  const clases = cursoDoc.data().clases || [];
+  clases.push({ num, titulo, driveId });
+  await updateDoc(doc(db, "cursos", id), { clases });
+  
+  showToast("✅ Clase agregada — ya aparece en el portal VIP");
+  document.getElementById("clase-titulo").value = "";
+  document.getElementById("clase-drive-url").value = "";
+  renderClasesAdmin(clases);
+};
+
+window.eliminarClase = async function(num) {
+  if (!confirm("¿Eliminar esta clase?")) return;
+  const cursoDoc = await getDoc(doc(db, "cursos", cursoActivoId));
+  const clases = (cursoDoc.data().clases || []).filter(c => c.num !== num);
+  await updateDoc(doc(db, "cursos", cursoActivoId), { clases });
+  showToast("Clase eliminada");
+  renderClasesAdmin(clases);
+};
+
+window.agregarMaterial = async function() {
+  const id = document.getElementById("clase-curso-id").value;
+  const titulo = document.getElementById("mat-titulo").value.trim();
+  const tipo = document.getElementById("mat-tipo").value;
+  const url = document.getElementById("mat-url").value.trim();
+  if (!titulo || !url) { showToast("⚠️ Nombre y link son obligatorios", "error"); return; }
+  
+  const cursoDoc = await getDoc(doc(db, "cursos", id));
+  const materiales = cursoDoc.data().materiales || [];
+  materiales.push({ titulo, tipo, url });
+  await updateDoc(doc(db, "cursos", id), { materiales });
+  
+  showToast("✅ Material agregado");
+  document.getElementById("mat-titulo").value = "";
+  document.getElementById("mat-url").value = "";
+  renderMaterialesAdmin(materiales);
+};
+
+window.eliminarMaterial = async function(index) {
+  if (!confirm("¿Eliminar este material?")) return;
+  const cursoDoc = await getDoc(doc(db, "cursos", cursoActivoId));
+  const materiales = cursoDoc.data().materiales || [];
+  materiales.splice(index, 1);
+  await updateDoc(doc(db, "cursos", cursoActivoId), { materiales });
+  showToast("Material eliminado");
+  renderMaterialesAdmin(materiales);
+};
+
 
 window.cerrarSesion = function() {
-  if (confirm("¿Cerrar sesión de admin?")) signOut(auth).then(() => window.location.href = "index.html");
+  if (confirm("¿Cerrar sesión de admin?")) signOut(auth).then(() => window.location.href = "login.html");
 };
 </script>
 
