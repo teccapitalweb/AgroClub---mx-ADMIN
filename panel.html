@@ -291,34 +291,34 @@
         <div class="stat-card">
           <div class="stat-card-top">
             <div class="stat-icon icon-verde">👥</div>
-            <span class="stat-trend trend-up">+5 este mes</span>
+            <span class="stat-trend trend-up" id="dash-trend-miembros">—</span>
           </div>
-          <div class="stat-num">47</div>
+          <div class="stat-num" id="dash-miembros-activos">—</div>
           <div class="stat-label">Miembros activos</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-top">
-            <div class="stat-icon icon-amarillo">💰</div>
-            <span class="stat-trend trend-up">+12%</span>
-          </div>
-          <div class="stat-num">$14,053</div>
-          <div class="stat-label">Ingresos este mes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-top">
-            <div class="stat-icon icon-azul">🎬</div>
-            <span class="stat-trend trend-up">+3 nuevos</span>
-          </div>
-          <div class="stat-num">19</div>
-          <div class="stat-label">Videos publicados</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-top">
             <div class="stat-icon icon-naranja">⏳</div>
-            <span class="stat-trend trend-down">3 pendientes</span>
+            <span class="stat-trend trend-down" id="dash-trend-pendientes">—</span>
           </div>
-          <div class="stat-num">3</div>
+          <div class="stat-num" id="dash-pendientes">—</div>
           <div class="stat-label">Accesos por aprobar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon icon-azul">🎓</div>
+            <span class="stat-trend trend-up" id="dash-trend-cursos">—</span>
+          </div>
+          <div class="stat-num" id="dash-cursos">—</div>
+          <div class="stat-label">Cursos publicados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon icon-morado">📡</div>
+            <span class="stat-trend trend-up" id="dash-trend-sesiones">—</span>
+          </div>
+          <div class="stat-num" id="dash-sesiones">—</div>
+          <div class="stat-label">Sesiones programadas</div>
         </div>
       </div>
 
@@ -331,31 +331,8 @@
         </div>
         <table>
           <thead><tr><th>Nombre</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="tbody-miembros">
-            <tr>
-              <td><div class="member-name">Miguel A. García</div><div class="member-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a4c9cdc3d1c1c8e4c5c3d6cbd0c1c78ac7cbc9">[email&#160;protected]</a></div></td>
-              <td>VIP Mensual</td><td>1 Mayo 2026</td>
-              <td><span class="status-badge status-activo">✅ Activo</span></td>
-              <td><div class="action-btns"><button class="btn-accion btn-ver-a">Ver</button><button class="btn-accion btn-desactivar">Desactivar</button></div></td>
-            </tr>
-            <tr>
-              <td><div class="member-name">Ana L. Hernández</div><div class="member-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="63020d0223040e020a0f4d000c0e">[email&#160;protected]</a></div></td>
-              <td>VIP Mensual</td><td>15 Abril 2026</td>
-              <td><span class="status-badge status-activo">✅ Activo</span></td>
-              <td><div class="action-btns"><button class="btn-accion btn-ver-a">Ver</button><button class="btn-accion btn-desactivar">Desactivar</button></div></td>
-            </tr>
-            <tr>
-              <td><div class="member-name">Carlos R. Mendoza</div><div class="member-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b3d0d2c1dfdcc0f3d5d2c1de9ddecb">[email&#160;protected]</a></div></td>
-              <td>VIP Mensual</td><td>3 Abril 2026</td>
-              <td><span class="status-badge status-vencido">❌ Vencido</span></td>
-              <td><div class="action-btns"><button class="btn-accion btn-ver-a">Ver</button><button class="btn-accion btn-activar">Activar</button></div></td>
-            </tr>
-            <tr>
-              <td><div class="member-name">Laura P. Torres</div><div class="member-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7814190d0a19381b170a0a1d17561500">[email&#160;protected]</a></div></td>
-              <td>VIP Mensual</td><td>—</td>
-              <td><span class="status-badge status-pendiente">⏳ Pendiente</span></td>
-              <td><div class="action-btns"><button class="btn-accion btn-activar" onclick="aprobarMiembro(this)">Aprobar</button><button class="btn-accion btn-desactivar">Rechazar</button></div></td>
-            </tr>
+          <tbody id="tbody-dash-miembros">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1011,10 +988,45 @@ db.collection('sesiones').orderBy('fechaHora').onSnapshot(function(snap) {
 
 // ── Miembros en tiempo real ───────────────────────────────────────────────────
 db.collection('miembros').onSnapshot(function(snap) {
-  var activos = snap.docs.filter(function(d){ return d.data().estado === 'activo'; }).length;
-  var el = document.querySelector('#page-dashboard .stats-row .stat-num');
-  if (el) el.textContent = activos;
+  var activos    = snap.docs.filter(function(d){ return d.data().estado === 'activo'; }).length;
+  var pendientes = snap.docs.filter(function(d){ return d.data().estado === 'pendiente'; }).length;
+  var total      = snap.docs.length;
 
+  // Stats dashboard
+  var elActivos    = document.getElementById('dash-miembros-activos');
+  var elPendientes = document.getElementById('dash-pendientes');
+  var elTrendM     = document.getElementById('dash-trend-miembros');
+  var elTrendP     = document.getElementById('dash-trend-pendientes');
+  if (elActivos)    elActivos.textContent    = activos;
+  if (elPendientes) elPendientes.textContent = pendientes;
+  if (elTrendM)     elTrendM.textContent     = total + ' total';
+  if (elTrendP)     elTrendP.textContent     = pendientes > 0 ? pendientes + ' por aprobar' : 'Sin pendientes';
+
+  // Sidebar badges
+  var badgeMiembros  = document.querySelector('.sidebar-item[onclick*="miembros"] .sidebar-badge');
+  var badgePendientes = document.querySelector('.sidebar-item[onclick*="pendientes"] .sidebar-badge');
+  if (badgeMiembros)   badgeMiembros.textContent   = activos;
+  if (badgePendientes) badgePendientes.textContent = pendientes;
+
+  // Tabla miembros recientes en dashboard (últimos 5)
+  var tbodyDash = document.getElementById('tbody-dash-miembros');
+  if (tbodyDash) {
+    var recientes = snap.docs.slice(-5).reverse();
+    tbodyDash.innerHTML = recientes.map(function(d) {
+      var m = d.data();
+      var sc = m.estado==='activo' ? 'status-activo' : m.estado==='pendiente' ? 'status-pendiente' : 'status-vencido';
+      var sl = m.estado==='activo' ? '✅ Activo' : m.estado==='pendiente' ? '⏳ Pendiente' : '❌ Vencido';
+      return '<tr><td><div class="member-name">'+(m.nombre||'—')+'</div><div class="member-email">'+(m.email||'')+'</div></td>'
+        +'<td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td>'
+        +'<td><span class="status-badge '+sc+'">'+sl+'</span></td>'
+        +'<td><div class="action-btns">'
+        +'<button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button>'
+        +'<button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button>'
+        +'</div></td></tr>';
+    }).join('');
+  }
+
+  // Tabla miembros completa
   var tbody = document.getElementById('tbody-miembros');
   if (!tbody) return;
   tbody.innerHTML = snap.docs.map(function(d) {
@@ -1022,6 +1034,8 @@ db.collection('miembros').onSnapshot(function(snap) {
     var sc = m.estado==='activo' ? 'status-activo' : m.estado==='pendiente' ? 'status-pendiente' : 'status-vencido';
     var sl = m.estado==='activo' ? '✅ Activo' : m.estado==='pendiente' ? '⏳ Pendiente' : '❌ Vencido';
     return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
+  }).join('');
+
   }).join('');
 });
 
@@ -1060,6 +1074,13 @@ var cursoActivoId = null;
 function loadCursos() {
   db.collection('cursos').onSnapshot(function(snap) {
     var cursos = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+
+    // Stat dashboard
+    var elCursos = document.getElementById('dash-cursos');
+    var elTrendC = document.getElementById('dash-trend-cursos');
+    if (elCursos) elCursos.textContent = cursos.length;
+    if (elTrendC) elTrendC.textContent = cursos.length > 0 ? cursos.length + ' publicados' : 'Sin cursos';
+
     var tbody = document.getElementById('tbody-cursos');
     if (!tbody) return;
     if (cursos.length === 0) {
@@ -1072,6 +1093,16 @@ function loadCursos() {
   });
 }
 loadCursos();
+
+// Sesiones — stat dashboard
+db.collection('sesiones').onSnapshot(function(snap) {
+  var ahora = new Date();
+  var proximas = snap.docs.filter(function(d){ return new Date(d.data().fechaHora) >= ahora; }).length;
+  var elSes  = document.getElementById('dash-sesiones');
+  var elTrS  = document.getElementById('dash-trend-sesiones');
+  if (elSes) elSes.textContent = proximas;
+  if (elTrS) elTrS.textContent = proximas > 0 ? proximas + ' próximas' : 'Sin sesiones';
+});
 
 function crearCurso() {
   var titulo    = (document.getElementById('curso-titulo').value || '').trim();
