@@ -388,28 +388,16 @@
     <div class="page" id="page-pendientes">
       <div class="page-header">
         <h2>⏳ Accesos pendientes</h2>
-        <p>Solicitudes de suscripción por aprobar</p>
+        <p>Clientes que pagaron pero aún no crearon su cuenta</p>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>3 solicitudes pendientes</h3></div>
+        <div class="table-header">
+          <h3>Pagos pendientes de registro (<span id="total-pendientes">0</span>)</h3>
+        </div>
         <table>
-          <thead><tr><th>Nombre</th><th>Email</th><th>WhatsApp</th><th>Solicitud</th><th>Acciones</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><div class="member-name">Laura P. Torres</div></td>
-              <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e884899d9a89a88b879a9a8d87c68590">[email&#160;protected]</a></td><td>+52 777 123 4567</td><td>9 Abril 2026</td>
-              <td><div class="action-btns"><button class="btn-accion btn-activar" onclick="aprobarMiembro(this)">✅ Aprobar</button><button class="btn-accion btn-desactivar">❌ Rechazar</button></div></td>
-            </tr>
-            <tr>
-              <td><div class="member-name">Roberto M. Soto</div></td>
-              <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c2b0ada0a7b0b6ad82b1adb6adecafba">[email&#160;protected]</a></td><td>+52 951 876 5432</td><td>8 Abril 2026</td>
-              <td><div class="action-btns"><button class="btn-accion btn-activar" onclick="aprobarMiembro(this)">✅ Aprobar</button><button class="btn-accion btn-desactivar">❌ Rechazar</button></div></td>
-            </tr>
-            <tr>
-              <td><div class="member-name">Claudia V. Reyes</div></td>
-              <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4e2d222f3b2a272f0e2d2f233e21602336">[email&#160;protected]</a></td><td>+52 664 345 6789</td><td>7 Abril 2026</td>
-              <td><div class="action-btns"><button class="btn-accion btn-activar" onclick="aprobarMiembro(this)">✅ Aprobar</button><button class="btn-accion btn-desactivar">❌ Rechazar</button></div></td>
-            </tr>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Plan</th><th>Vence</th><th>Fecha pago</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-pendientes">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sin pagos pendientes 🎉</td></tr>
           </tbody>
         </table>
       </div>
@@ -1039,6 +1027,54 @@ db.collection('miembros').onSnapshot(function(snap) {
     return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
   }).join('');
 });
+
+// ── Pagos pendientes (pagaron pero no crearon cuenta) ────────────────────────
+db.collection('pagos_pendientes').onSnapshot(function(snap) {
+  var total = snap.docs.length;
+  var totalEl = document.getElementById('total-pendientes');
+  var badgeEl = document.getElementById('badge-pendientes');
+  if (totalEl) totalEl.textContent = total;
+  if (badgeEl) badgeEl.textContent = total;
+
+  // Stat dashboard
+  var elPend  = document.getElementById('dash-pendientes');
+  var elTrend = document.getElementById('dash-trend-pendientes');
+  if (elPend)  elPend.textContent  = total;
+  if (elTrend) elTrend.textContent = total > 0 ? total + ' sin registrar' : 'Sin pendientes';
+
+  var tbody = document.getElementById('tbody-pendientes');
+  if (!tbody) return;
+
+  if (snap.empty) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sin pagos pendientes 🎉</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = snap.docs.map(function(d) {
+    var p = d.data();
+    var fecha = p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }) : '—';
+    var waLink = p.email ? 'https://wa.me/52' + (p.whatsapp || '').replace(/\D/g,'') : '#';
+    var msg = encodeURIComponent('Hola ' + (p.nombre || '') + ', ya procesamos tu pago de AgroClub MX 🌿 Para acceder al portal solo crea tu cuenta en: https://agrotecamerican.com con el email ' + p.email);
+    return '<tr>'
+      + '<td><div class="member-name">' + (p.nombre || '—') + '</div></td>'
+      + '<td>' + (p.email || '—') + '</td>'
+      + '<td>' + (p.plan || '—') + '</td>'
+      + '<td>' + (p.vence || '—') + '</td>'
+      + '<td>' + fecha + '</td>'
+      + '<td><div class="action-btns">'
+      + '<a href="https://wa.me/' + (p.whatsapp||'').replace(/\D/g,'') + '?text=' + msg + '" target="_blank"><button class="btn-accion btn-activar">💬 WhatsApp</button></a>'
+      + '<button class="btn-accion btn-desactivar" onclick="eliminarPendiente(\'' + d.id + '\')">🗑 Eliminar</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+});
+
+function eliminarPendiente(id) {
+  if (!confirm('¿Eliminar este pago pendiente?')) return;
+  db.collection('pagos_pendientes').doc(id).delete()
+    .then(function() { showToast('Registro eliminado'); });
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function cambiarEstado(id, estado) {
   db.collection('miembros').doc(id).update({ estado: estado });
