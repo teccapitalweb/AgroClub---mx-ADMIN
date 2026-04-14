@@ -687,27 +687,22 @@
     <div class="page" id="page-stats">
       <div class="page-header"><h2>📈 Estadísticas</h2></div>
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-verde">👥</div></div><div class="stat-num">47</div><div class="stat-label">Miembros activos</div></div>
-        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-amarillo">💰</div></div><div class="stat-num">$14,053</div><div class="stat-label">Ingresos abril</div></div>
-        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-azul">👁️</div></div><div class="stat-num">342</div><div class="stat-label">Videos vistos</div></div>
-        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-naranja">📥</div></div><div class="stat-num">198</div><div class="stat-label">PDFs descargados</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-verde">👥</div></div><div class="stat-num" id="stats-miembros">—</div><div class="stat-label">Miembros activos</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-azul">🎓</div></div><div class="stat-num" id="stats-cursos">—</div><div class="stat-label">Cursos publicados</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-morado">👁️</div></div><div class="stat-num" id="stats-clases-vistas">—</div><div class="stat-label">Clases completadas</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon icon-naranja">📡</div></div><div class="stat-num" id="stats-sesiones">—</div><div class="stat-label">Sesiones programadas</div></div>
       </div>
       <div class="charts-grid">
         <div class="chart-card">
-          <h3>📊 Contenido más visto</h3>
-          <div class="bar-chart">
-            <div class="bar-row"><span class="bar-row-label">Hidroponia</span><div class="bar-wrap"><div class="bar-fill" style="width:90%;background:var(--azul)"></div></div><span class="bar-count">38</span></div>
-            <div class="bar-row"><span class="bar-row-label">Biofertiliz.</span><div class="bar-wrap"><div class="bar-fill" style="width:55%;background:var(--verde-claro)"></div></div><span class="bar-count">21</span></div>
-            <div class="bar-row"><span class="bar-row-label">IA Agrícola</span><div class="bar-wrap"><div class="bar-fill" style="width:40%;background:var(--morado)"></div></div><span class="bar-count">15</span></div>
-            <div class="bar-row"><span class="bar-row-label">Pitahaya</span><div class="bar-wrap"><div class="bar-fill" style="width:28%;background:var(--naranja)"></div></div><span class="bar-count">11</span></div>
+          <h3>📊 Cursos más vistos</h3>
+          <div class="bar-chart" id="chart-contenido">
+            <p style="color:var(--muted);font-size:.82rem;">Cargando...</p>
           </div>
         </div>
         <div class="chart-card">
-          <h3>💰 Ingresos por mes</h3>
-          <div class="bar-chart">
-            <div class="bar-row"><span class="bar-row-label">Abril 2026</span><div class="bar-wrap"><div class="bar-fill" style="width:88%;background:var(--verde-claro)"></div></div><span class="bar-count">$14k</span></div>
-            <div class="bar-row"><span class="bar-row-label">Marzo 2026</span><div class="bar-wrap"><div class="bar-fill" style="width:72%;background:var(--verde-medio)"></div></div><span class="bar-count">$11k</span></div>
-            <div class="bar-row"><span class="bar-row-label">Feb 2026</span><div class="bar-wrap"><div class="bar-fill" style="width:55%;background:var(--verde)"></div></div><span class="bar-count">$9k</span></div>
+          <h3>👥 Nuevos miembros por mes</h3>
+          <div class="bar-chart" id="chart-miembros-mes">
+            <p style="color:var(--muted);font-size:.82rem;">Cargando...</p>
           </div>
         </div>
       </div>
@@ -1027,6 +1022,94 @@ db.collection('miembros').onSnapshot(function(snap) {
     return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
   }).join('');
 });
+
+// ── ESTADÍSTICAS ─────────────────────────────────────────────────────────────
+var colores = ['var(--azul)','var(--verde-claro)','var(--morado)','var(--naranja)','var(--rojo)','var(--amarillo)'];
+
+function renderBarChart(containerId, items, maxVal) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (items.length === 0) { el.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Sin datos aún</p>'; return; }
+  el.innerHTML = items.map(function(item, i) {
+    var pct = maxVal > 0 ? Math.round(item.val / maxVal * 100) : 0;
+    return '<div class="bar-row">'
+      + '<span class="bar-row-label">' + item.label + '</span>'
+      + '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%;background:' + colores[i % colores.length] + ';transition:width .6s ease;"></div></div>'
+      + '<span class="bar-count">' + item.val + '</span>'
+      + '</div>';
+  }).join('');
+}
+
+// Stats: miembros activos + cursos + sesiones
+db.collection('miembros').onSnapshot(function(snap) {
+  var activos = snap.docs.filter(function(d){ return d.data().estado === 'activo'; }).length;
+  var el = document.getElementById('stats-miembros');
+  if (el) el.textContent = activos;
+
+  // Miembros por mes
+  var porMes = {};
+  snap.docs.forEach(function(d) {
+    var fecha = d.data().fechaRegistro;
+    if (!fecha) return;
+    var dt = new Date(fecha);
+    var key = dt.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' });
+    porMes[key] = (porMes[key] || 0) + 1;
+  });
+  var meses = Object.keys(porMes).slice(-4).reverse();
+  var maxMes = Math.max.apply(null, meses.map(function(k){ return porMes[k]; })) || 1;
+  renderBarChart('chart-miembros-mes', meses.map(function(k){
+    return { label: k, val: porMes[k] };
+  }), maxMes);
+});
+
+db.collection('cursos').onSnapshot(function(snap) {
+  var el = document.getElementById('stats-cursos');
+  if (el) el.textContent = snap.docs.length;
+});
+
+db.collection('sesiones').onSnapshot(function(snap) {
+  var ahora = new Date();
+  var proximas = snap.docs.filter(function(d){ return new Date(d.data().fechaHora) >= ahora; }).length;
+  var el = document.getElementById('stats-sesiones');
+  if (el) el.textContent = proximas;
+});
+
+// Cursos más vistos: leer progreso + cruzar con nombres de cursos
+Promise.all([
+  db.collection('progreso').get(),
+  db.collection('cursos').get()
+]).then(function(results) {
+  var progresoSnap = results[0];
+  var cursosSnap   = results[1];
+
+  var cursoNombres = {};
+  cursosSnap.docs.forEach(function(d) {
+    cursoNombres[d.id] = (d.data().emoji || '🎓') + ' ' + (d.data().titulo || d.id);
+  });
+
+  var conteo = {};
+  var totalClases = 0;
+  progresoSnap.docs.forEach(function(d) {
+    var data = d.data();
+    Object.keys(data).forEach(function(cursoId) {
+      var clasesVistas = Array.isArray(data[cursoId]) ? data[cursoId].length : 0;
+      conteo[cursoId] = (conteo[cursoId] || 0) + clasesVistas;
+      totalClases += clasesVistas;
+    });
+  });
+
+  var elClases = document.getElementById('stats-clases-vistas');
+  if (elClases) elClases.textContent = totalClases;
+
+  var ranking = Object.keys(conteo)
+    .map(function(id) { return { label: (cursoNombres[id] || id).substring(0, 16), val: conteo[id] }; })
+    .sort(function(a, b) { return b.val - a.val; })
+    .slice(0, 5);
+
+  var maxVal = ranking.length > 0 ? ranking[0].val : 1;
+  renderBarChart('chart-contenido', ranking, maxVal);
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Pagos pendientes (pagaron pero no crearon cuenta) ────────────────────────
 db.collection('pagos_pendientes').onSnapshot(function(snap) {
