@@ -241,11 +241,11 @@
       </div>
       <div class="sidebar-item" onclick="showPage('miembros', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">👥</span> Miembros</div>
-        <span class="s-badge">47</span>
+        <span class="s-badge" id="badge-miembros">0</span>
       </div>
       <div class="sidebar-item" onclick="showPage('pendientes', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">⏳</span> Pendientes</div>
-        <span class="s-badge" style="background:var(--naranja);color:#fff">3</span>
+        <span class="s-badge" style="background:var(--naranja);color:#fff" id="badge-pendientes">0</span>
       </div>
     </div>
     <div class="sidebar-section">
@@ -346,7 +346,7 @@
       </div>
       <div class="table-card">
         <div class="table-header">
-          <h3>Todos los miembros (47)</h3>
+          <h3>Todos los miembros (<span id="total-miembros">0</span>)</h3>
           <div class="table-actions">
             <input class="search-input" placeholder="🔍 Buscar miembro...">
             <button class="btn-add" onclick="openModal()">+ Agregar</button>
@@ -1003,10 +1003,13 @@ db.collection('miembros').onSnapshot(function(snap) {
   if (elTrendP)     elTrendP.textContent     = pendientes > 0 ? pendientes + ' por aprobar' : 'Sin pendientes';
 
   // Sidebar badges
-  var badgeMiembros  = document.querySelector('.sidebar-item[onclick*="miembros"] .sidebar-badge');
-  var badgePendientes = document.querySelector('.sidebar-item[onclick*="pendientes"] .sidebar-badge');
+  var badgeMiembros   = document.getElementById('badge-miembros');
+  var badgePendientes = document.getElementById('badge-pendientes');
+  var totalEl         = document.getElementById('total-miembros');
   if (badgeMiembros)   badgeMiembros.textContent   = activos;
   if (badgePendientes) badgePendientes.textContent = pendientes;
+  if (totalEl)         totalEl.textContent         = total;
+
 
   // Tabla miembros recientes en dashboard (últimos 5)
   var tbodyDash = document.getElementById('tbody-dash-miembros');
