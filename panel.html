@@ -1035,8 +1035,6 @@ db.collection('miembros').onSnapshot(function(snap) {
     var sl = m.estado==='activo' ? '✅ Activo' : m.estado==='pendiente' ? '⏳ Pendiente' : '❌ Vencido';
     return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
   }).join('');
-
-  }).join('');
 });
 
 function cambiarEstado(id, estado) {
