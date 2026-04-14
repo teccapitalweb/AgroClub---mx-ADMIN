@@ -712,14 +712,13 @@
     <div class="page" id="page-pagos">
       <div class="page-header"><h2>💰 Control de pagos</h2></div>
       <div class="table-card">
-        <div class="table-header"><h3>Pagos registrados</h3><button class="btn-add">+ Registrar pago</button></div>
+        <div class="table-header">
+          <h3>Pagos registrados (<span id="total-pagos">0</span>)</h3>
+        </div>
         <table>
-          <thead><tr><th>Miembro</th><th>Monto</th><th>Fecha</th><th>Método</th><th>Estado</th></tr></thead>
-          <tbody>
-            <tr><td><div class="member-name">Miguel A. García</div></td><td>$299 MXN</td><td>1 Abril 2026</td><td>Transferencia</td><td><span class="status-badge status-activo">✅ Confirmado</span></td></tr>
-            <tr><td><div class="member-name">Ana L. Hernández</div></td><td>$299 MXN</td><td>15 Marzo 2026</td><td>WhatsApp</td><td><span class="status-badge status-activo">✅ Confirmado</span></td></tr>
-            <tr><td><div class="member-name">Carlos R. Mendoza</div></td><td>$299 MXN</td><td>3 Marzo 2026</td><td>Transferencia</td><td><span class="status-badge status-vencido">❌ Vencido</span></td></tr>
-            <tr><td><div class="member-name">Laura P. Torres</div></td><td>$299 MXN</td><td>9 Abril 2026</td><td>WhatsApp</td><td><span class="status-badge status-pendiente">⏳ Por confirmar</span></td></tr>
+          <thead><tr><th>Miembro</th><th>Plan</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody id="tbody-pagos">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Sin pagos registrados aún</td></tr>
           </tbody>
         </table>
       </div>
@@ -1022,6 +1021,32 @@ db.collection('miembros').onSnapshot(function(snap) {
     return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
   }).join('');
 });
+
+// ── PAGOS desde Firebase ─────────────────────────────────────────────────────
+db.collection('pagos').orderBy('fecha', 'desc').onSnapshot(function(snap) {
+  var totalEl = document.getElementById('total-pagos');
+  var tbody   = document.getElementById('tbody-pagos');
+  if (totalEl) totalEl.textContent = snap.docs.length;
+  if (!tbody) return;
+
+  if (snap.empty) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Sin pagos registrados aún</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = snap.docs.map(function(d) {
+    var p = d.data();
+    var fecha = p.fecha ? new Date(p.fecha).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }) : '—';
+    return '<tr>'
+      + '<td><div class="member-name">' + (p.nombre || '—') + '</div><div class="member-email">' + (p.email || '') + '</div></td>'
+      + '<td>' + (p.plan || '—') + '</td>'
+      + '<td>' + (p.monto || '—') + '</td>'
+      + '<td>' + fecha + '</td>'
+      + '<td><span class="status-badge status-activo">✅ Confirmado</span></td>'
+      + '</tr>';
+  }).join('');
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── ESTADÍSTICAS ─────────────────────────────────────────────────────────────
 var colores = ['var(--azul)','var(--verde-claro)','var(--morado)','var(--naranja)','var(--rojo)','var(--amarillo)'];
