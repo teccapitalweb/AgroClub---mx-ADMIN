@@ -555,19 +555,18 @@
       <div class="content-form">
         <h3>➕ Agregar nuevo PDF</h3>
         <div class="form-grid">
-          <div class="form-group"><label>Título del PDF</label><input type="text" placeholder="Ej: Guía de fertirrigación en chile serrano"></div>
+          <div class="form-group"><label>Título del PDF</label><input type="text" id="pdf-titulo" placeholder="Ej: Guía de fertirrigación en chile serrano"></div>
           <div class="form-group"><label>Páginas</label><input type="number" id="pdf-paginas" placeholder="8"></div>
           <div class="form-group form-full"><label>URL del PDF (Google Drive o link directo)</label><input type="text" id="pdf-url" placeholder="https://drive.google.com/..."></div>
         </div>
         <button class="btn-add" onclick="publicarPDF()">✅ Publicar PDF</button>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>PDFs publicados (8)</h3></div>
+        <div class="table-header"><h3>PDFs publicados (<span id="total-pdfs">0</span>)</h3></div>
         <table>
-          <thead><tr><th>Título</th><th>Páginas</th><th>Descargas</th><th>Mes</th><th>Acciones</th></tr></thead>
-          <tbody>
-            <tr><td>Guía de fertirrigación en chile serrano</td><td>8</td><td>34</td><td>Abril 2026</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
-            <tr><td>Checklist de manejo integrado de plagas</td><td>3</td><td>41</td><td>Abril 2026</td><td><div class="action-btns"><button class="btn-accion btn-ver-a">Editar</button><button class="btn-accion btn-desactivar">Eliminar</button></div></td></tr>
+          <thead><tr><th>Título</th><th>Páginas</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-pdfs">
+            <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">No hay PDFs publicados aún</td></tr>
           </tbody>
         </table>
       </div>
@@ -1243,6 +1242,33 @@ function publicarPDF() {
   db.collection('pdfs').add({ titulo:titulo, paginas:paginas, url:url, fecha: new Date().toISOString() })
     .then(function(){ showToast('✅ PDF publicado — ya aparece en el portal VIP'); document.getElementById('pdf-titulo').value=''; document.getElementById('pdf-url').value=''; });
 }
+
+function eliminarPDF(id) {
+  if (!confirm('¿Eliminar este PDF?')) return;
+  db.collection('pdfs').doc(id).delete().then(function(){ showToast('PDF eliminado'); });
+}
+
+db.collection('pdfs').onSnapshot(function(snap) {
+  var totalEl = document.getElementById('total-pdfs');
+  var tbody   = document.getElementById('tbody-pdfs');
+  if (totalEl) totalEl.textContent = snap.docs.length;
+  if (!tbody) return;
+  if (snap.empty) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">No hay PDFs publicados aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = snap.docs.map(function(d) {
+    var p = d.data();
+    return '<tr>'
+      + '<td><div class="member-name">' + (p.titulo||'—') + '</div></td>'
+      + '<td>' + (p.paginas||'—') + '</td>'
+      + '<td><div class="action-btns">'
+      + '<a href="' + (p.url||'#') + '" target="_blank"><button class="btn-accion btn-ver-a">Ver</button></a>'
+      + '<button class="btn-accion btn-desactivar" onclick="eliminarPDF(\'' + d.id + '\')">Eliminar</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ── CURSOS ────────────────────────────────────────────────────────────────────
