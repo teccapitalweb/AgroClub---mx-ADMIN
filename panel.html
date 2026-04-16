@@ -438,6 +438,14 @@
             <input type="color" id="curso-color" value="#1a6b2f" style="height:42px;padding:4px;">
           </div>
           <div class="form-group form-full">
+            <label>URL de foto promocional</label>
+            <input type="text" id="curso-foto" placeholder="https://i.imgur.com/xxx.jpg — sube la imagen en imgur.com">
+          </div>
+          <div class="form-group">
+            <label>🔒 Fecha de desbloqueo <span style="font-weight:400;color:var(--muted);">(dejar vacío = disponible ya)</span></label>
+            <input type="date" id="curso-fecha-desbloqueo">
+          </div>
+          <div class="form-group form-full">
             <label>Descripción</label>
             <textarea id="curso-desc" placeholder="Describe el contenido del curso..." style="min-height:80px;"></textarea>
           </div>
@@ -1291,8 +1299,20 @@ function loadCursos() {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No hay cursos creados aún</td></tr>';
       return;
     }
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
     tbody.innerHTML = cursos.map(function(c){
-      return '<tr><td><div class="member-name">'+(c.emoji||'🎓')+' '+c.titulo+'</div></td><td>'+(c.categoria||'—')+'</td><td>'+((c.clases||[]).length)+' clases</td><td><span class="status-badge status-activo">✅ Publicado</span></td><td><div class="action-btns"><button class="btn-accion btn-ver-a" onclick="abrirDetalleCurso(\''+c.id+'\')">Gestionar</button><button class="btn-accion btn-desactivar" onclick="eliminarCurso(\''+c.id+'\')">Eliminar</button></div></td></tr>';
+      var bloqueado = false;
+      var estadoHTML = '<span class="status-badge status-activo">✅ Disponible</span>';
+      if (c.fechaDesbloqueo) {
+        var fd = new Date(c.fechaDesbloqueo + 'T00:00:00');
+        if (fd > hoy) {
+          bloqueado = true;
+          var fechaStr = fd.toLocaleDateString('es-MX', {day:'numeric',month:'short',year:'numeric'});
+          estadoHTML = '<span class="status-badge" style="background:rgba(185,28,28,.1);color:#b91c1c;">🔒 '+fechaStr+'</span>';
+        }
+      }
+      var fotoTag = c.foto ? '<img src="'+c.foto+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:8px;">' : (c.emoji||'🎓')+' ';
+      return '<tr><td><div class="member-name">'+fotoTag+c.titulo+'</div></td><td>'+(c.categoria||'—')+'</td><td>'+((c.clases||[]).length)+' clases</td><td>'+estadoHTML+'</td><td><div class="action-btns"><button class="btn-accion btn-ver-a" onclick="abrirDetalleCurso(\''+c.id+'\')">Gestionar</button><button class="btn-accion btn-desactivar" onclick="eliminarCurso(\''+c.id+'\')">Eliminar</button></div></td></tr>';
     }).join('');
   });
 }
@@ -1309,18 +1329,23 @@ db.collection('sesiones').onSnapshot(function(snap) {
 });
 
 function crearCurso() {
-  var titulo    = (document.getElementById('curso-titulo').value || '').trim();
-  var emoji     = (document.getElementById('curso-emoji').value  || '').trim() || '🎓';
-  var categoria = document.getElementById('curso-categoria').value;
-  var color     = document.getElementById('curso-color').value;
-  var desc      = (document.getElementById('curso-desc').value   || '').trim();
+  var titulo           = (document.getElementById('curso-titulo').value || '').trim();
+  var emoji            = (document.getElementById('curso-emoji').value  || '').trim() || '🎓';
+  var categoria        = document.getElementById('curso-categoria').value;
+  var color            = document.getElementById('curso-color').value;
+  var desc             = (document.getElementById('curso-desc').value   || '').trim();
+  var foto             = (document.getElementById('curso-foto').value   || '').trim();
+  var fechaDesbloqueo  = document.getElementById('curso-fecha-desbloqueo').value || null;
   if (!titulo) { showToast('⚠️ El título es obligatorio','error'); return; }
-  db.collection('cursos').add({ titulo:titulo, emoji:emoji, categoria:categoria, color:color, descripcion:desc, clases:[], materiales:[], fecha: new Date().toISOString() })
+  var datos = { titulo:titulo, emoji:emoji, categoria:categoria, color:color, descripcion:desc, foto:foto, fechaDesbloqueo:fechaDesbloqueo, clases:[], materiales:[], fecha: new Date().toISOString() };
+  db.collection('cursos').add(datos)
     .then(function(){
       showToast('✅ Curso creado — ya aparece en el portal VIP');
       document.getElementById('curso-titulo').value = '';
       document.getElementById('curso-desc').value   = '';
       document.getElementById('curso-emoji').value  = '';
+      document.getElementById('curso-foto').value   = '';
+      document.getElementById('curso-fecha-desbloqueo').value = '';
     });
 }
 
