@@ -200,7 +200,17 @@
     .chart-card h3 { font-size: .9rem; font-weight: 700; margin-bottom: 16px; }
     .bar-chart { display: flex; flex-direction: column; gap: 10px; }
     .bar-row { display: flex; align-items: center; gap: 12px; }
-    .bar-row-label { font-size: .78rem; width: 90px; flex-shrink: 0; color: var(--muted); }
+    .bar-row-label {
+      font-size: .82rem;
+      width: 150px;
+      flex-shrink: 0;
+      color: var(--text, #1a2010);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 640px) { .bar-row-label { width: 120px; font-size: .78rem; } }
     .bar-wrap { flex: 1; height: 8px; background: var(--bg); border-radius: 100px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 100px; transition: width .8s ease; }
     .bar-count { font-size: .75rem; font-weight: 600; width: 30px; text-align: right; flex-shrink: 0; }
@@ -1203,8 +1213,9 @@ function renderBarChart(containerId, items, maxVal) {
   if (items.length === 0) { el.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Sin datos aún</p>'; return; }
   el.innerHTML = items.map(function(item, i) {
     var pct = maxVal > 0 ? Math.round(item.val / maxVal * 100) : 0;
+    var safeLabel = String(item.label).replace(/"/g, '&quot;');
     return '<div class="bar-row">'
-      + '<span class="bar-row-label">' + item.label + '</span>'
+      + '<span class="bar-row-label" title="' + safeLabel + '">' + item.label + '</span>'
       + '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%;background:' + colores[i % colores.length] + ';transition:width .6s ease;"></div></div>'
       + '<span class="bar-count">' + item.val + '</span>'
       + '</div>';
@@ -1273,7 +1284,9 @@ Promise.all([
   if (elClases) elClases.textContent = totalClases;
 
   var ranking = Object.keys(conteo)
-    .map(function(id) { return { label: (cursoNombres[id] || id).substring(0, 16), val: conteo[id] }; })
+    // Filtrar cursos fantasma (que ya no existen en la colección 'cursos')
+    .filter(function(id) { return !!cursoNombres[id]; })
+    .map(function(id) { return { label: cursoNombres[id], val: conteo[id] }; })
     .sort(function(a, b) { return b.val - a.val; })
     .slice(0, 5);
 
