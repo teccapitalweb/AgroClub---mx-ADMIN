@@ -214,6 +214,92 @@
     .modal-btns { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
     .btn-cancel { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 18px; font-size: .84rem; font-weight: 600; cursor: pointer; font-family: var(--font); }
     .btn-confirm { background: var(--verde); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: .84rem; font-weight: 600; cursor: pointer; font-family: var(--font); }
+
+    /* ===== COLOR PICKER (swatches) ===== */
+    .agro-color-picker { display: flex; flex-direction: column; gap: 10px; }
+    .swatches-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .swatch {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      padding: 0;
+      outline: none;
+    }
+    .swatch:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    .swatch.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 2px var(--verde,#1a6b2f), 0 4px 10px rgba(26,107,47,.3);
+    }
+    .swatch.active::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      color: #fff;
+      font-weight: 900;
+      font-size: 16px;
+      display: grid;
+      place-items: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    }
+    .custom-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg,#f4f6f3);
+      border: 1.5px dashed var(--border,#cdd5c9);
+      color: var(--text,#1a2010);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-family: var(--font), inherit;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s ease;
+      width: 100%;
+      justify-content: center;
+    }
+    .custom-toggle:hover { background: #eaf3ec; border-color: #52c97a; }
+    .custom-toggle.active { background: #eaf3ec; border-color: var(--verde,#1a6b2f); border-style: solid; }
+    .custom-toggle__dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1a6b2f;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.1);
+      transition: background .15s ease;
+      flex-shrink: 0;
+    }
+    .custom-picker-wrap {
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg,#f4f6f3);
+      border-radius: 10px;
+    }
+    #curso-color {
+      width: 48px;
+      height: 40px;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+      background: #fff;
+    }
+    #curso-color::-webkit-color-swatch-wrapper { padding: 0; }
+    #curso-color::-webkit-color-swatch { border: none; border-radius: 6px; }
+    #curso-color::-moz-color-swatch { border: none; border-radius: 6px; }
+    .custom-picker-hex {
+      font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+      font-weight: 700;
+      color: var(--text,#1a2010);
+      text-transform: uppercase;
+      font-size: .9rem;
+      letter-spacing: .05em;
+    }
   </style>
 </head>
 <body>
@@ -431,7 +517,30 @@
           </div>
           <div class="form-group">
             <label>Color del curso</label>
-            <input type="color" id="curso-color" value="#1a6b2f" style="height:42px;padding:4px;">
+            <div class="agro-color-picker">
+              <div class="swatches-grid" id="swatches-grid">
+                <button type="button" class="swatch active" style="background:#1a6b2f;" title="Verde AgroTec" onclick="seleccionarSwatch('#1a6b2f', this)"></button>
+                <button type="button" class="swatch" style="background:#2d8a3e;" title="Verde campo" onclick="seleccionarSwatch('#2d8a3e', this)"></button>
+                <button type="button" class="swatch" style="background:#52c97a;" title="Verde lima" onclick="seleccionarSwatch('#52c97a', this)"></button>
+                <button type="button" class="swatch" style="background:#8bc34a;" title="Verde primavera" onclick="seleccionarSwatch('#8bc34a', this)"></button>
+                <button type="button" class="swatch" style="background:#4a7c2e;" title="Verde oliva" onclick="seleccionarSwatch('#4a7c2e', this)"></button>
+                <button type="button" class="swatch" style="background:#0d4a8f;" title="Azul riego" onclick="seleccionarSwatch('#0d4a8f', this)"></button>
+                <button type="button" class="swatch" style="background:#f9a825;" title="Amarillo maíz" onclick="seleccionarSwatch('#f9a825', this)"></button>
+                <button type="button" class="swatch" style="background:#ef6c00;" title="Naranja cosecha" onclick="seleccionarSwatch('#ef6c00', this)"></button>
+                <button type="button" class="swatch" style="background:#d84315;" title="Rojo tomate" onclick="seleccionarSwatch('#d84315', this)"></button>
+                <button type="button" class="swatch" style="background:#8b5a2b;" title="Café tierra" onclick="seleccionarSwatch('#8b5a2b', this)"></button>
+                <button type="button" class="swatch" style="background:#5d4037;" title="Chocolate suelo" onclick="seleccionarSwatch('#5d4037', this)"></button>
+                <button type="button" class="swatch" style="background:#546e7a;" title="Gris piedra" onclick="seleccionarSwatch('#546e7a', this)"></button>
+              </div>
+              <button type="button" class="custom-toggle" id="custom-toggle-btn" onclick="toggleColorCustom()">
+                <span class="custom-toggle__dot" id="custom-toggle-dot"></span>
+                <span id="custom-toggle-label">🎨 Color personalizado</span>
+              </button>
+              <div class="custom-picker-wrap" id="custom-picker-wrap" style="display:none;">
+                <input type="color" id="curso-color" value="#1a6b2f" oninput="onCustomColorChange()">
+                <span class="custom-picker-hex" id="custom-hex">#1A6B2F</span>
+              </div>
+            </div>
           </div>
           <div class="form-group form-full">
             <label>URL de foto promocional</label>
@@ -1325,6 +1434,57 @@ db.collection('sesiones').onSnapshot(function(snap) {
   if (elTrS) elTrS.textContent = proximas > 0 ? proximas + ' próximas' : 'Sin sesiones';
 });
 
+// ===== COLOR PICKER (swatches) =====
+function seleccionarSwatch(color, el) {
+  var input = document.getElementById('curso-color');
+  if (input) input.value = color;
+
+  var swatches = document.querySelectorAll('.swatches-grid .swatch');
+  for (var i = 0; i < swatches.length; i++) swatches[i].classList.remove('active');
+  if (el) el.classList.add('active');
+
+  var dot = document.getElementById('custom-toggle-dot');
+  if (dot) dot.style.background = color;
+
+  // Si el picker custom estaba abierto, ciérralo
+  var wrap = document.getElementById('custom-picker-wrap');
+  var btn  = document.getElementById('custom-toggle-btn');
+  var lbl  = document.getElementById('custom-toggle-label');
+  if (wrap) wrap.style.display = 'none';
+  if (btn)  btn.classList.remove('active');
+  if (lbl)  lbl.textContent = '🎨 Color personalizado';
+}
+
+function toggleColorCustom() {
+  var wrap  = document.getElementById('custom-picker-wrap');
+  var btn   = document.getElementById('custom-toggle-btn');
+  var lbl   = document.getElementById('custom-toggle-label');
+  if (!wrap) return;
+  var isOpen = wrap.style.display && wrap.style.display !== 'none';
+  if (isOpen) {
+    wrap.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+    if (lbl) lbl.textContent = '🎨 Color personalizado';
+  } else {
+    wrap.style.display = 'flex';
+    if (btn) btn.classList.add('active');
+    if (lbl) lbl.textContent = '🎨 Elige tu color exacto';
+    var swatches = document.querySelectorAll('.swatches-grid .swatch');
+    for (var i = 0; i < swatches.length; i++) swatches[i].classList.remove('active');
+    onCustomColorChange();
+  }
+}
+
+function onCustomColorChange() {
+  var input = document.getElementById('curso-color');
+  if (!input) return;
+  var color = input.value;
+  var hex = document.getElementById('custom-hex');
+  var dot = document.getElementById('custom-toggle-dot');
+  if (hex) hex.textContent = color.toUpperCase();
+  if (dot) dot.style.background = color;
+}
+
 function crearCurso() {
   var titulo           = (document.getElementById('curso-titulo').value || '').trim();
   var emoji            = (document.getElementById('curso-emoji').value  || '').trim() || '🎓';
@@ -1343,6 +1503,9 @@ function crearCurso() {
       document.getElementById('curso-emoji').value  = '';
       document.getElementById('curso-foto').value   = '';
       document.getElementById('curso-fecha-desbloqueo').value = '';
+      // Resetear color picker al verde AgroTec
+      var primerSwatch = document.querySelector('.swatches-grid .swatch');
+      if (primerSwatch) seleccionarSwatch('#1a6b2f', primerSwatch);
     });
 }
 
