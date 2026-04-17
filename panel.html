@@ -354,7 +354,10 @@
         <div class="sidebar-item-left"><span class="sidebar-item-icon">📄</span> PDFs</div>
       </div>
       <div class="sidebar-item" onclick="showPage('sesiones-admin', this)">
-        <div class="sidebar-item-left"><span class="sidebar-item-icon">🔴</span> Sesiones en vivo</div>
+        <div class="sidebar-item-left"><span class="sidebar-item-icon">🎥</span> Webinars</div>
+      </div>
+      <div class="sidebar-item" onclick="showPage('avisos-admin', this)">
+        <div class="sidebar-item-left"><span class="sidebar-item-icon">📢</span> Avisos</div>
       </div>
     </div>
     <div class="sidebar-section">
@@ -698,13 +701,13 @@
 
     <!-- SESIONES ADMIN -->
     <div class="page" id="page-sesiones-admin">
-      <div class="page-header"><h2>🔴 Sesiones en vivo</h2></div>
+      <div class="page-header"><h2>🎥 Webinars</h2></div>
 
       <div class="ses-card">
         <div class="ses-card-header">
           <div class="ses-card-icon">📡</div>
           <div>
-            <div class="ses-card-title">Nueva sesión en vivo</div>
+            <div class="ses-card-title">Nuevo webinar</div>
             <div class="ses-card-sub">Se notificará a todos los miembros activos</div>
           </div>
         </div>
@@ -801,6 +804,84 @@
           <thead><tr><th>Título</th><th>Instructor</th><th>Fecha y hora</th><th>Link</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tbody-sesiones">
             <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No hay sesiones programadas aún</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AVISOS / NOTIFICACIONES MANUALES -->
+    <div class="page" id="page-avisos-admin">
+      <div class="page-header">
+        <h2>📢 Avisos personalizados</h2>
+        <p>Envía mensajes directos al panel de notificaciones de todos los socios</p>
+      </div>
+
+      <div class="ses-card">
+        <div class="ses-card-header">
+          <div class="ses-card-icon" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa);">📢</div>
+          <div>
+            <div class="ses-card-title">Nuevo aviso para los socios</div>
+            <div class="ses-card-sub">Se publicará al instante en la sección "🔔 Notificaciones" del portal VIP</div>
+          </div>
+        </div>
+
+        <!-- Título + Emoji -->
+        <div class="ses-row">
+          <div class="ses-field ses-field-wide">
+            <div class="ses-label">📣 Título del aviso</div>
+            <div class="ses-input-wrap">
+              <input id="aviso-titulo" type="text" class="ses-input" placeholder="Ej: ¡Mantenimiento programado este domingo!">
+            </div>
+          </div>
+          <div class="ses-field">
+            <div class="ses-label">Emoji (opcional)</div>
+            <div class="ses-input-wrap">
+              <input id="aviso-emoji" type="text" class="ses-input" placeholder="📣" maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="ses-row">
+          <div class="ses-field ses-field-wide" style="width:100%;">
+            <div class="ses-label">Mensaje</div>
+            <div class="ses-input-wrap">
+              <textarea id="aviso-desc" class="ses-input" rows="4" style="min-height:90px;resize:vertical;" placeholder="Escribe el mensaje que verán los socios..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Link opcional -->
+        <div class="ses-row">
+          <div class="ses-field ses-field-wide" style="width:100%;">
+            <div class="ses-label">🔗 Link (opcional)</div>
+            <div class="ses-input-wrap">
+              <input id="aviso-link" type="text" class="ses-input" placeholder="https://... (si lo dejas vacío, la notificación no será clickeable)">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-add" id="btn-enviar-aviso" onclick="enviarAvisoManual()">📤 Enviar aviso a todos</button>
+      </div>
+
+      <!-- HISTORIAL DE NOTIFICACIONES -->
+      <div class="table-card" style="margin-top:24px;">
+        <div class="table-header">
+          <h3>📜 Historial de notificaciones</h3>
+          <span style="font-size:.78rem;color:var(--muted);">Últimas 50 notificaciones enviadas</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Título</th>
+              <th>Enviada</th>
+              <th>Origen</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-notificaciones">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1066,6 +1147,15 @@ function programarSesion() {
   db.collection('sesiones').add({ titulo:titulo, instructor:instructor, fechaHora:fecha+'T'+hora, link:link, fecha:new Date().toISOString() })
     .then(function(){
       showToast('✅ Sesión programada — los miembros ya pueden verla');
+      // Notificar a los socios
+      var fechaLeg = new Date(fecha+'T'+hora).toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
+                   + ' a las ' + new Date(fecha+'T'+hora).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+      crearNotificacionAuto('webinar', {
+        titulo: 'Nuevo webinar: ' + titulo,
+        descripcion: (instructor ? 'Con ' + instructor + ' · ' : '') + fechaLeg,
+        emoji: '🎥',
+        link: link || null
+      });
       ['ses-titulo','ses-instructor','ses-link'].forEach(function(id){ document.getElementById(id).value=''; });
       document.getElementById('ses-fecha').value=''; document.getElementById('ses-hora').value='';
       document.getElementById('fecha-texto').textContent='Seleccionar fecha';
@@ -1073,6 +1163,105 @@ function programarSesion() {
       _selHora = {h:null,m:null,ampm:'AM'};
     });
 }
+
+// ========== HELPER: CREAR NOTIFICACIÓN ==========
+function crearNotificacionAuto(tipo, datos) {
+  try {
+    db.collection('notificaciones').add({
+      tipo: tipo,                         // 'curso' | 'clase' | 'webinar' | 'material' | 'aviso'
+      titulo: datos.titulo || '',
+      descripcion: datos.descripcion || '',
+      emoji: datos.emoji || '',
+      link: datos.link || null,
+      fecha: new Date().toISOString(),
+      enviadoPor: 'sistema'
+    });
+  } catch (e) {
+    console.warn('No se pudo crear notificación:', e);
+  }
+}
+
+// ========== FORMULARIO MANUAL: ENVIAR AVISO ==========
+function enviarAvisoManual() {
+  var tituloEl = document.getElementById('aviso-titulo');
+  var descEl   = document.getElementById('aviso-desc');
+  var emojiEl  = document.getElementById('aviso-emoji');
+  var linkEl   = document.getElementById('aviso-link');
+  var btn      = document.getElementById('btn-enviar-aviso');
+
+  var titulo = (tituloEl ? tituloEl.value : '').trim();
+  var desc   = (descEl   ? descEl.value   : '').trim();
+  var emoji  = (emojiEl  ? emojiEl.value  : '').trim() || '📣';
+  var link   = (linkEl   ? linkEl.value   : '').trim();
+
+  if (!titulo) {
+    showToast('⚠️ El título del aviso es obligatorio', 'error');
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = '📤 Enviando...'; }
+
+  db.collection('notificaciones').add({
+    tipo: 'aviso',
+    titulo: titulo,
+    descripcion: desc,
+    emoji: emoji,
+    link: link || null,
+    fecha: new Date().toISOString(),
+    enviadoPor: 'admin'
+  }).then(function() {
+    showToast('✅ Aviso enviado a todos los socios');
+    if (tituloEl) tituloEl.value = '';
+    if (descEl)   descEl.value = '';
+    if (emojiEl)  emojiEl.value = '';
+    if (linkEl)   linkEl.value = '';
+    if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar aviso a todos'; }
+  }).catch(function(err) {
+    console.error(err);
+    showToast('❌ Error al enviar el aviso', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar aviso a todos'; }
+  });
+}
+
+function eliminarNotificacion(id) {
+  if (!confirm('¿Eliminar esta notificación? Desaparecerá del portal VIP.')) return;
+  db.collection('notificaciones').doc(id).delete().then(function() {
+    showToast('Notificación eliminada');
+  });
+}
+
+// Listener: mostrar historial de notificaciones en el admin
+db.collection('notificaciones').orderBy('fecha', 'desc').limit(50).onSnapshot(function(snap) {
+  var tbody = document.getElementById('tbody-notificaciones');
+  if (!tbody) return;
+  if (snap.empty) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Aún no se han enviado notificaciones</td></tr>';
+    return;
+  }
+  var mapaTipo = {
+    curso:    { label: 'Curso',    color: '#16a34a' },
+    clase:    { label: 'Clase',    color: '#2563eb' },
+    webinar:  { label: 'Webinar',  color: '#dc2626' },
+    material: { label: 'Material', color: '#d97706' },
+    aviso:    { label: 'Aviso',    color: '#7c3aed' }
+  };
+  tbody.innerHTML = snap.docs.map(function(d) {
+    var n = d.data();
+    var t = mapaTipo[n.tipo] || { label: n.tipo || '—', color: '#6b7867' };
+    var fechaTxt = n.fecha ? new Date(n.fecha).toLocaleString('es-MX', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    }) : '—';
+    var origen = n.enviadoPor === 'admin' ? '👤 Manual' : '⚙️ Automática';
+    var emoji = n.emoji ? n.emoji + ' ' : '';
+    return '<tr>' +
+      '<td><span style="background:' + t.color + '20;color:' + t.color + ';padding:3px 10px;border-radius:100px;font-size:.72rem;font-weight:700;">' + t.label + '</span></td>' +
+      '<td>' + emoji + (n.titulo || '—') + '</td>' +
+      '<td style="font-size:.78rem;color:var(--muted);">' + fechaTxt + '</td>' +
+      '<td style="font-size:.78rem;color:var(--muted);">' + origen + '</td>' +
+      '<td><button class="btn-accion btn-desactivar" onclick="eliminarNotificacion(\'' + d.id + '\')">Eliminar</button></td>' +
+      '</tr>';
+  }).join('');
+});
 function eliminarSesion(id) {
   if (!confirm('¿Eliminar esta sesión?')) return;
   db.collection('sesiones').doc(id).delete().then(function(){ showToast('Sesión eliminada'); });
@@ -1367,7 +1556,17 @@ function publicarPDF() {
   var url     = document.getElementById('pdf-url').value.trim();
   if (!titulo || !url) { showToast('⚠️ Título y URL son obligatorios','error'); return; }
   db.collection('pdfs').add({ titulo:titulo, paginas:paginas, url:url, fecha: new Date().toISOString() })
-    .then(function(){ showToast('✅ PDF publicado — ya aparece en el portal VIP'); document.getElementById('pdf-titulo').value=''; document.getElementById('pdf-url').value=''; });
+    .then(function(){
+      showToast('✅ PDF publicado — ya aparece en el portal VIP');
+      crearNotificacionAuto('material', {
+        titulo: 'Nuevo material: ' + titulo,
+        descripcion: paginas ? 'PDF · ' + paginas + ' páginas disponibles para descarga' : 'Nuevo PDF disponible para descarga',
+        emoji: '📄',
+        link: url
+      });
+      document.getElementById('pdf-titulo').value='';
+      document.getElementById('pdf-url').value='';
+    });
 }
 
 function eliminarPDF(id) {
@@ -1510,8 +1709,15 @@ function crearCurso() {
   if (!titulo) { showToast('⚠️ El título es obligatorio','error'); return; }
   var datos = { titulo:titulo, emoji:emoji, categoria:categoria, color:color, descripcion:desc, foto:foto, fechaDesbloqueo:fechaDesbloqueo, clases:[], materiales:[], fecha: new Date().toISOString() };
   db.collection('cursos').add(datos)
-    .then(function(){
+    .then(function(ref){
       showToast('✅ Curso creado — ya aparece en el portal VIP');
+      // Notificar a los socios
+      crearNotificacionAuto('curso', {
+        titulo: 'Nuevo curso: ' + titulo,
+        descripcion: desc || 'Nuevo curso disponible en tu biblioteca',
+        emoji: emoji,
+        link: null
+      });
       document.getElementById('curso-titulo').value = '';
       document.getElementById('curso-desc').value   = '';
       if (emojiEl) emojiEl.value = '';
@@ -1573,6 +1779,14 @@ function agregarClase() {
     clases.push({ num: num, titulo: titulo, driveId: driveId });
     db.collection('cursos').doc(id).update({ clases: clases }).then(function(){
       showToast('✅ Clase agregada — ya aparece en el portal VIP');
+      // Notificar
+      var cursoNombre = (snap.data().emoji || '🎓') + ' ' + (snap.data().titulo || 'Curso');
+      crearNotificacionAuto('clase', {
+        titulo: 'Nueva clase: ' + titulo,
+        descripcion: 'En ' + cursoNombre,
+        emoji: '🎬',
+        link: null
+      });
       document.getElementById('clase-titulo').value = '';
       document.getElementById('clase-drive-url').value = '';
       renderClasesAdmin(clases);
