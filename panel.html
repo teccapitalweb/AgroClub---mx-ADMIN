@@ -1487,7 +1487,8 @@ function onCustomColorChange() {
 
 function crearCurso() {
   var titulo           = (document.getElementById('curso-titulo').value || '').trim();
-  var emoji            = (document.getElementById('curso-emoji').value  || '').trim() || '🎓';
+  var emojiEl          = document.getElementById('curso-emoji');
+  var emoji            = emojiEl ? ((emojiEl.value || '').trim() || '🎓') : '🎓';
   var categoria        = document.getElementById('curso-categoria').value;
   var color            = document.getElementById('curso-color').value;
   var desc             = (document.getElementById('curso-desc').value   || '').trim();
@@ -1500,7 +1501,7 @@ function crearCurso() {
       showToast('✅ Curso creado — ya aparece en el portal VIP');
       document.getElementById('curso-titulo').value = '';
       document.getElementById('curso-desc').value   = '';
-      document.getElementById('curso-emoji').value  = '';
+      if (emojiEl) emojiEl.value = '';
       document.getElementById('curso-foto').value   = '';
       document.getElementById('curso-fecha-desbloqueo').value = '';
       // Resetear color picker al verde AgroTec
