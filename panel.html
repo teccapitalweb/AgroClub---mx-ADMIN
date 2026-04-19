@@ -602,6 +602,26 @@
         <p style="color:var(--muted);font-size:.88rem;" id="detalle-curso-desc"></p>
       </div>
 
+      <!-- EDITAR FECHA DE DESBLOQUEO -->
+      <div class="content-form" style="margin-bottom:24px;border-left:4px solid #f59e0b;background:linear-gradient(135deg,#fffbeb,#fff);">
+        <h3 style="display:flex;align-items:center;gap:8px;">
+          <span>📅 Fecha de lanzamiento</span>
+          <span id="estado-fecha-badge" style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:#fef3c7;color:#92400e;">—</span>
+        </h3>
+        <p style="color:var(--muted);font-size:.82rem;margin:4px 0 14px;">Controla cuándo este curso se desbloquea para los socios. Si lo dejas vacío, queda disponible inmediatamente.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nueva fecha de desbloqueo</label>
+            <input type="date" id="editar-curso-fecha">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;gap:10px;">
+            <button class="btn-add" onclick="actualizarFechaDesbloqueo()" style="background:#d97706;margin:0;">💾 Guardar fecha</button>
+            <button class="btn-add" onclick="quitarFechaDesbloqueo()" style="background:transparent;color:#92400e;border:1px solid #f59e0b;margin:0;">🔓 Desbloquear ahora</button>
+          </div>
+        </div>
+        <div id="fecha-preview" style="margin-top:12px;font-size:.82rem;color:var(--muted);"></div>
+      </div>
+
       <!-- AGREGAR CLASE -->
       <div class="content-form" style="margin-bottom:24px;">
         <h3>➕ Agregar clase</h3>
@@ -1741,10 +1761,75 @@ function abrirDetalleCurso(id) {
     var curso = Object.assign({ id: id }, snap.data());
     document.getElementById('detalle-curso-titulo').textContent = (curso.emoji||'🎓') + ' ' + curso.titulo;
     document.getElementById('detalle-curso-desc').textContent   = curso.descripcion || '';
+
+    // Precargar la fecha de desbloqueo en el input
+    var inputFecha = document.getElementById('editar-curso-fecha');
+    if (inputFecha) inputFecha.value = curso.fechaDesbloqueo || '';
+    actualizarUIFecha(curso.fechaDesbloqueo);
+
     renderClasesAdmin(curso.clases || []);
     renderMaterialesAdmin(curso.materiales || []);
     showPage('detalle-curso-admin', null);
   });
+}
+
+// Actualizar el badge + preview según la fecha actual
+function actualizarUIFecha(fecha) {
+  var badge = document.getElementById('estado-fecha-badge');
+  var preview = document.getElementById('fecha-preview');
+  if (!badge || !preview) return;
+  if (!fecha) {
+    badge.textContent = '✅ Disponible';
+    badge.style.background = '#d1fae5';
+    badge.style.color = '#065f46';
+    preview.innerHTML = '🔓 Sin fecha bloqueada. Los socios pueden ver este curso <strong>ahora mismo</strong>.';
+    return;
+  }
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var fd = new Date(fecha + 'T00:00:00');
+  var diasRestantes = Math.ceil((fd - hoy) / (1000*60*60*24));
+  var fechaLegible = fd.toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  if (diasRestantes <= 0) {
+    badge.textContent = '✅ Disponible';
+    badge.style.background = '#d1fae5';
+    badge.style.color = '#065f46';
+    preview.innerHTML = '✅ Este curso ya está <strong>desbloqueado</strong> desde el ' + fechaLegible + '.';
+  } else {
+    badge.textContent = '🔒 Bloqueado';
+    badge.style.background = '#fef3c7';
+    badge.style.color = '#92400e';
+    preview.innerHTML = '🔒 Se desbloqueará el <strong>' + fechaLegible + '</strong> (faltan <strong>' + diasRestantes + ' día' + (diasRestantes === 1 ? '' : 's') + '</strong>).';
+  }
+}
+
+function actualizarFechaDesbloqueo() {
+  if (!cursoActivoId) { showToast('⚠️ No hay curso seleccionado','error'); return; }
+  var nuevaFecha = document.getElementById('editar-curso-fecha').value || null;
+  db.collection('cursos').doc(cursoActivoId).update({ fechaDesbloqueo: nuevaFecha })
+    .then(function() {
+      showToast('✅ Fecha actualizada correctamente');
+      actualizarUIFecha(nuevaFecha);
+    })
+    .catch(function(err) {
+      console.error(err);
+      showToast('❌ Error al actualizar la fecha','error');
+    });
+}
+
+function quitarFechaDesbloqueo() {
+  if (!cursoActivoId) { showToast('⚠️ No hay curso seleccionado','error'); return; }
+  if (!confirm('¿Desbloquear este curso inmediatamente para todos los socios?')) return;
+  db.collection('cursos').doc(cursoActivoId).update({ fechaDesbloqueo: null })
+    .then(function() {
+      showToast('🔓 Curso desbloqueado — ya está disponible para todos');
+      document.getElementById('editar-curso-fecha').value = '';
+      actualizarUIFecha(null);
+    })
+    .catch(function(err) {
+      console.error(err);
+      showToast('❌ Error al desbloquear el curso','error');
+    });
 }
 
 function renderClasesAdmin(clases) {
