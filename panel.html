@@ -563,7 +563,7 @@
           <div class="form-group">
             <label>📊 Orden de desbloqueo <span style="font-weight:400;color:var(--muted);">(1, 2, 3...)</span></label>
             <input type="number" id="curso-orden" min="1" placeholder="1" value="1">
-            <small style="color:var(--muted);font-size:.72rem;">Curso 1 → disponible al pagar. Curso 2 → 15 días después. Curso 3 → 30 días. (Se calcula por socio.)</small>
+            <small style="color:var(--muted);font-size:.72rem;">Curso 1 → disponible al pagar. Curso 2 → 8 días después. Curso 3 → 16 días. (Se calcula por socio.)</small>
           </div>
           <div class="form-group">
             <label>🔒 Fecha global manual <span style="font-weight:400;color:var(--muted);">(opcional, sobrescribe el orden)</span></label>
@@ -615,14 +615,14 @@
           <span id="estado-fecha-badge" style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:#fef3c7;color:#92400e;">—</span>
         </h3>
         <p style="color:var(--muted);font-size:.82rem;margin:4px 0 14px;">
-          El <strong>orden</strong> desbloquea el curso cada 15 días desde que el socio pagó (individual por socio).<br>
+          El <strong>orden</strong> desbloquea el curso cada 8 días desde que el socio pagó (individual por socio).<br>
           La <strong>fecha manual</strong> es opcional y sobrescribe el orden (igual para todos).
         </p>
         <div class="form-grid">
           <div class="form-group">
             <label>Orden de desbloqueo</label>
             <input type="number" id="editar-curso-orden" min="1" placeholder="1">
-            <small style="color:var(--muted);font-size:.72rem;">1 = disponible al pagar · 2 = +15 días · 3 = +30 días...</small>
+            <small style="color:var(--muted);font-size:.72rem;">1 = disponible al pagar · 2 = +8 días · 3 = +16 días...</small>
           </div>
           <div class="form-group" style="display:flex;align-items:flex-end;gap:10px;">
             <button class="btn-add" onclick="actualizarOrdenCurso()" style="background:#d97706;margin:0;">💾 Guardar orden</button>
@@ -1834,7 +1834,7 @@ function actualizarUIFecha(fecha, orden) {
     badge.style.color = '#065f46';
     preview.innerHTML = '🔓 <strong>Orden ' + o + '</strong> — cada socio lo ve <strong>el mismo día que paga</strong>.';
   } else {
-    var dias = (o - 1) * 15;
+    var dias = (o - 1) * 8;
     badge.textContent = '📊 Orden ' + o;
     badge.style.background = '#dbeafe';
     badge.style.color = '#1e40af';
