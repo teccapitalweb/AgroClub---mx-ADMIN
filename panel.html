@@ -561,8 +561,14 @@
             <small style="color:var(--muted);font-size:.72rem;">Drive: Compartir → Cualquier persona → copiar ID del link → pegar como https://drive.google.com/uc?id=XXXX</small>
           </div>
           <div class="form-group">
-            <label>🔒 Fecha de desbloqueo <span style="font-weight:400;color:var(--muted);">(dejar vacío = disponible ya)</span></label>
+            <label>📊 Orden de desbloqueo <span style="font-weight:400;color:var(--muted);">(1, 2, 3...)</span></label>
+            <input type="number" id="curso-orden" min="1" placeholder="1" value="1">
+            <small style="color:var(--muted);font-size:.72rem;">Curso 1 → disponible al pagar. Curso 2 → 15 días después. Curso 3 → 30 días. (Se calcula por socio.)</small>
+          </div>
+          <div class="form-group">
+            <label>🔒 Fecha global manual <span style="font-weight:400;color:var(--muted);">(opcional, sobrescribe el orden)</span></label>
             <input type="date" id="curso-fecha-desbloqueo">
+            <small style="color:var(--muted);font-size:.72rem;">Déjalo vacío para usar el desbloqueo por orden. Úsalo solo si quieres una fecha igual para TODOS los socios.</small>
           </div>
           <div class="form-group form-full">
             <label>Descripción</label>
@@ -602,21 +608,33 @@
         <p style="color:var(--muted);font-size:.88rem;" id="detalle-curso-desc"></p>
       </div>
 
-      <!-- EDITAR FECHA DE DESBLOQUEO -->
+      <!-- EDITAR ORDEN DE DESBLOQUEO Y FECHA MANUAL -->
       <div class="content-form" style="margin-bottom:24px;border-left:4px solid #f59e0b;background:linear-gradient(135deg,#fffbeb,#fff);">
         <h3 style="display:flex;align-items:center;gap:8px;">
-          <span>📅 Fecha de lanzamiento</span>
+          <span>📊 Desbloqueo del curso</span>
           <span id="estado-fecha-badge" style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:#fef3c7;color:#92400e;">—</span>
         </h3>
-        <p style="color:var(--muted);font-size:.82rem;margin:4px 0 14px;">Controla cuándo este curso se desbloquea para los socios. Si lo dejas vacío, queda disponible inmediatamente.</p>
+        <p style="color:var(--muted);font-size:.82rem;margin:4px 0 14px;">
+          El <strong>orden</strong> desbloquea el curso cada 15 días desde que el socio pagó (individual por socio).<br>
+          La <strong>fecha manual</strong> es opcional y sobrescribe el orden (igual para todos).
+        </p>
         <div class="form-grid">
           <div class="form-group">
-            <label>Nueva fecha de desbloqueo</label>
+            <label>Orden de desbloqueo</label>
+            <input type="number" id="editar-curso-orden" min="1" placeholder="1">
+            <small style="color:var(--muted);font-size:.72rem;">1 = disponible al pagar · 2 = +15 días · 3 = +30 días...</small>
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;gap:10px;">
+            <button class="btn-add" onclick="actualizarOrdenCurso()" style="background:#d97706;margin:0;">💾 Guardar orden</button>
+          </div>
+          <div class="form-group">
+            <label>Fecha manual (opcional)</label>
             <input type="date" id="editar-curso-fecha">
+            <small style="color:var(--muted);font-size:.72rem;">Vacío = usar orden por socio</small>
           </div>
           <div class="form-group" style="display:flex;align-items:flex-end;gap:10px;">
             <button class="btn-add" onclick="actualizarFechaDesbloqueo()" style="background:#d97706;margin:0;">💾 Guardar fecha</button>
-            <button class="btn-add" onclick="quitarFechaDesbloqueo()" style="background:transparent;color:#92400e;border:1px solid #f59e0b;margin:0;">🔓 Desbloquear ahora</button>
+            <button class="btn-add" onclick="quitarFechaDesbloqueo()" style="background:transparent;color:#92400e;border:1px solid #f59e0b;margin:0;">🔓 Quitar fecha</button>
           </div>
         </div>
         <div id="fecha-preview" style="margin-top:12px;font-size:.82rem;color:var(--muted);"></div>
@@ -1726,8 +1744,11 @@ function crearCurso() {
   var desc             = (document.getElementById('curso-desc').value   || '').trim();
   var foto             = (document.getElementById('curso-foto').value   || '').trim();
   var fechaDesbloqueo  = document.getElementById('curso-fecha-desbloqueo').value || null;
+  var ordenInput       = document.getElementById('curso-orden');
+  var orden            = ordenInput && ordenInput.value ? parseInt(ordenInput.value, 10) : 1;
+  if (isNaN(orden) || orden < 1) orden = 1;
   if (!titulo) { showToast('⚠️ El título es obligatorio','error'); return; }
-  var datos = { titulo:titulo, emoji:emoji, categoria:categoria, color:color, descripcion:desc, foto:foto, fechaDesbloqueo:fechaDesbloqueo, clases:[], materiales:[], fecha: new Date().toISOString() };
+  var datos = { titulo:titulo, emoji:emoji, categoria:categoria, color:color, descripcion:desc, foto:foto, fechaDesbloqueo:fechaDesbloqueo, orden:orden, clases:[], materiales:[], fecha: new Date().toISOString() };
   db.collection('cursos').add(datos)
     .then(function(ref){
       showToast('✅ Curso creado — ya aparece en el portal VIP');
@@ -1743,6 +1764,7 @@ function crearCurso() {
       if (emojiEl) emojiEl.value = '';
       document.getElementById('curso-foto').value   = '';
       document.getElementById('curso-fecha-desbloqueo').value = '';
+      if (ordenInput) ordenInput.value = '1';
       // Resetear color picker al verde AgroTec
       var primerSwatch = document.querySelector('.swatches-grid .swatch');
       if (primerSwatch) seleccionarSwatch('#1a6b2f', primerSwatch);
@@ -1765,7 +1787,12 @@ function abrirDetalleCurso(id) {
     // Precargar la fecha de desbloqueo en el input
     var inputFecha = document.getElementById('editar-curso-fecha');
     if (inputFecha) inputFecha.value = curso.fechaDesbloqueo || '';
-    actualizarUIFecha(curso.fechaDesbloqueo);
+
+    // Precargar el orden en el input
+    var inputOrden = document.getElementById('editar-curso-orden');
+    if (inputOrden) inputOrden.value = curso.orden || 1;
+
+    actualizarUIFecha(curso.fechaDesbloqueo, curso.orden);
 
     renderClasesAdmin(curso.clases || []);
     renderMaterialesAdmin(curso.materiales || []);
@@ -1773,43 +1800,74 @@ function abrirDetalleCurso(id) {
   });
 }
 
-// Actualizar el badge + preview según la fecha actual
-function actualizarUIFecha(fecha) {
+// Actualizar el badge + preview según la fecha actual y el orden
+function actualizarUIFecha(fecha, orden) {
   var badge = document.getElementById('estado-fecha-badge');
   var preview = document.getElementById('fecha-preview');
   if (!badge || !preview) return;
-  if (!fecha) {
-    badge.textContent = '✅ Disponible';
-    badge.style.background = '#d1fae5';
-    badge.style.color = '#065f46';
-    preview.innerHTML = '🔓 Sin fecha bloqueada. Los socios pueden ver este curso <strong>ahora mismo</strong>.';
+
+  // Caso 1: fecha manual global presente
+  if (fecha) {
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+    var fd = new Date(fecha + 'T00:00:00');
+    var diasRestantes = Math.ceil((fd - hoy) / (1000*60*60*24));
+    var fechaLegible = fd.toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    if (diasRestantes <= 0) {
+      badge.textContent = '✅ Disponible';
+      badge.style.background = '#d1fae5';
+      badge.style.color = '#065f46';
+      preview.innerHTML = '✅ Fecha manual: desbloqueado desde el ' + fechaLegible + ' (igual para todos los socios).';
+    } else {
+      badge.textContent = '🔒 Bloqueado (fecha global)';
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+      preview.innerHTML = '🔒 Fecha manual: se desbloqueará el <strong>' + fechaLegible + '</strong> (faltan ' + diasRestantes + ' día' + (diasRestantes === 1 ? '' : 's') + ') · Igual para todos los socios.';
+    }
     return;
   }
-  var hoy = new Date(); hoy.setHours(0,0,0,0);
-  var fd = new Date(fecha + 'T00:00:00');
-  var diasRestantes = Math.ceil((fd - hoy) / (1000*60*60*24));
-  var fechaLegible = fd.toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-  if (diasRestantes <= 0) {
-    badge.textContent = '✅ Disponible';
+  // Caso 2: usar orden
+  var o = orden || 1;
+  if (o <= 1) {
+    badge.textContent = '✅ Disponible al pagar';
     badge.style.background = '#d1fae5';
     badge.style.color = '#065f46';
-    preview.innerHTML = '✅ Este curso ya está <strong>desbloqueado</strong> desde el ' + fechaLegible + '.';
+    preview.innerHTML = '🔓 <strong>Orden ' + o + '</strong> — cada socio lo ve <strong>el mismo día que paga</strong>.';
   } else {
-    badge.textContent = '🔒 Bloqueado';
-    badge.style.background = '#fef3c7';
-    badge.style.color = '#92400e';
-    preview.innerHTML = '🔒 Se desbloqueará el <strong>' + fechaLegible + '</strong> (faltan <strong>' + diasRestantes + ' día' + (diasRestantes === 1 ? '' : 's') + '</strong>).';
+    var dias = (o - 1) * 15;
+    badge.textContent = '📊 Orden ' + o;
+    badge.style.background = '#dbeafe';
+    badge.style.color = '#1e40af';
+    preview.innerHTML = '📅 <strong>Orden ' + o + '</strong> — cada socio lo verá <strong>' + dias + ' días después</strong> de haber pagado (individual por socio).';
   }
+}
+
+function actualizarOrdenCurso() {
+  if (!cursoActivoId) { showToast('⚠️ No hay curso seleccionado','error'); return; }
+  var inputOrden = document.getElementById('editar-curso-orden');
+  var nuevoOrden = inputOrden && inputOrden.value ? parseInt(inputOrden.value, 10) : 1;
+  if (isNaN(nuevoOrden) || nuevoOrden < 1) nuevoOrden = 1;
+  var fechaActual = document.getElementById('editar-curso-fecha').value || null;
+  db.collection('cursos').doc(cursoActivoId).update({ orden: nuevoOrden })
+    .then(function() {
+      showToast('✅ Orden actualizado');
+      actualizarUIFecha(fechaActual, nuevoOrden);
+    })
+    .catch(function(err) {
+      console.error(err);
+      showToast('❌ Error al actualizar el orden','error');
+    });
 }
 
 function actualizarFechaDesbloqueo() {
   if (!cursoActivoId) { showToast('⚠️ No hay curso seleccionado','error'); return; }
   var nuevaFecha = document.getElementById('editar-curso-fecha').value || null;
+  var ordenActual = document.getElementById('editar-curso-orden');
+  var orden = ordenActual && ordenActual.value ? parseInt(ordenActual.value, 10) : 1;
   db.collection('cursos').doc(cursoActivoId).update({ fechaDesbloqueo: nuevaFecha })
     .then(function() {
       showToast('✅ Fecha actualizada correctamente');
-      actualizarUIFecha(nuevaFecha);
+      actualizarUIFecha(nuevaFecha, orden);
     })
     .catch(function(err) {
       console.error(err);
@@ -1819,12 +1877,14 @@ function actualizarFechaDesbloqueo() {
 
 function quitarFechaDesbloqueo() {
   if (!cursoActivoId) { showToast('⚠️ No hay curso seleccionado','error'); return; }
-  if (!confirm('¿Desbloquear este curso inmediatamente para todos los socios?')) return;
+  if (!confirm('¿Quitar la fecha manual? El curso pasará a usar el desbloqueo por orden (individual por socio).')) return;
+  var ordenActual = document.getElementById('editar-curso-orden');
+  var orden = ordenActual && ordenActual.value ? parseInt(ordenActual.value, 10) : 1;
   db.collection('cursos').doc(cursoActivoId).update({ fechaDesbloqueo: null })
     .then(function() {
-      showToast('🔓 Curso desbloqueado — ya está disponible para todos');
+      showToast('🔓 Fecha manual quitada — ahora usa el orden por socio');
       document.getElementById('editar-curso-fecha').value = '';
-      actualizarUIFecha(null);
+      actualizarUIFecha(null, orden);
     })
     .catch(function(err) {
       console.error(err);
