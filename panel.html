@@ -359,6 +359,9 @@
       <div class="sidebar-item" onclick="showPage('avisos-admin', this)">
         <div class="sidebar-item-left"><span class="sidebar-item-icon">📢</span> Avisos</div>
       </div>
+      <div class="sidebar-item" onclick="showPage('examenes-admin', this)">
+        <div class="sidebar-item-left"><span class="sidebar-item-icon">📝</span> Exámenes</div>
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Reportes</div>
@@ -981,6 +984,74 @@
         </div>
         <button class="btn-add" onclick="guardarConfig()">💾 Guardar cambios</button>
         <span id="cfg-status" style="margin-left:14px;font-size:.82rem;color:var(--verde-claro);display:none;">✅ Guardado</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════ 📝 EXÁMENES ═══════════════ -->
+    <div class="page" id="page-examenes-admin">
+      <div class="page-header">
+        <h2>📝 Exámenes de cursos</h2>
+        <p>Crea preguntas para cada curso. El alumno las responde después de terminar todas las clases.</p>
+      </div>
+
+      <!-- Vista 1: Lista de cursos -->
+      <div id="ex-vista-lista">
+        <div class="content-form" style="padding:18px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+            <input type="text" id="ex-filter" placeholder="🔍 Buscar curso..." oninput="filtrarCursosExamenes()" style="flex:1;min-width:200px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:var(--font);font-size:.9rem;outline:none;">
+            <div style="font-size:.82rem;color:var(--muted);"><span id="ex-stat-con">0</span> con examen · <span id="ex-stat-sin">0</span> sin examen</div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Curso</th><th>Clases</th><th>Examen</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tbody-examenes">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vista 2: Editor de examen -->
+      <div id="ex-vista-editor" style="display:none;">
+        <button onclick="volverListaExamenes()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:16px;">← Volver a lista de cursos</button>
+
+        <div class="content-form">
+          <h3 id="ex-editor-titulo">Examen del curso</h3>
+          <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;"><span id="ex-editor-meta">—</span></p>
+
+          <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:12px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:.85rem;color:#78350f;margin-bottom:6px;"><strong>💡 Consejos rápidos</strong></div>
+            <ul style="font-size:.78rem;color:#92400e;padding-left:20px;line-height:1.6;">
+              <li>Sugerencia: 10 preguntas por examen con 4 opciones cada una</li>
+              <li>Marca cuál opción es la correcta con el botón radio</li>
+              <li>El alumno aprueba con 60% (6/10) y desbloquea un logro</li>
+              <li>Puedes importar preguntas desde JSON (pídelas en el chat)</li>
+            </ul>
+          </div>
+
+          <!-- Importador JSON -->
+          <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:12px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:.85rem;font-weight:800;color:#1e40af;margin-bottom:4px;">📥 Importar desde JSON</div>
+            <p style="font-size:.76rem;color:#1e40af;margin-bottom:10px;">Si me pediste las preguntas por chat, pega el JSON aquí:</p>
+            <textarea id="ex-json-import" rows="4" style="width:100%;padding:10px;border:1px solid #93c5fd;border-radius:8px;font-family:monospace;font-size:.76rem;background:#fff;resize:vertical;" placeholder='[{"pregunta":"...","opciones":["A","B","C","D"],"correcta":0}, ...]'></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn-add" style="width:auto;padding:8px 16px;" onclick="importarExamenJSON()">📥 Importar JSON</button>
+              <button onclick="document.getElementById('ex-json-import').value=''" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-family:var(--font);font-size:.82rem;cursor:pointer;">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- Lista de preguntas -->
+          <div id="ex-preguntas-container"></div>
+
+          <button class="btn-add" onclick="agregarPreguntaExamen()" style="margin-top:14px;">+ Agregar pregunta</button>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--border);margin-top:18px;flex-wrap:wrap;">
+            <button onclick="eliminarExamenAdmin()" style="background:rgba(239,68,68,.1);color:#b91c1c;border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 18px;font-family:var(--font);font-weight:700;font-size:.85rem;cursor:pointer;">🗑 Eliminar examen</button>
+            <button class="btn-add" style="width:auto;padding:10px 22px;" onclick="guardarExamenAdmin()">💾 Guardar examen</button>
+          </div>
+          <span id="ex-save-status" style="margin-left:14px;font-size:.82rem;color:var(--verde-claro);display:none;">✅ Guardado</span>
+        </div>
       </div>
     </div>
 
@@ -1977,6 +2048,247 @@ function eliminarMaterial(idx) {
     });
   });
 }
+
+// ═══════════════════════════════════════════════════════════
+// 📝 EXÁMENES
+// ═══════════════════════════════════════════════════════════
+
+var CURSOS_CACHE = [];
+var EXAMENES_CACHE = {};
+var EX_CURSO_ACTIVO = null;
+var EX_PREGUNTAS_WORK = [];
+
+function cargarExamenesAdmin() {
+  db.collection('cursos').get().then(function(cursosSnap) {
+    CURSOS_CACHE = cursosSnap.docs.map(function(d){ return Object.assign({id: d.id}, d.data()); });
+    CURSOS_CACHE.sort(function(a, b) { return (a.titulo || '').localeCompare(b.titulo || ''); });
+
+    return db.collection('examenes').get();
+  }).then(function(exSnap) {
+    EXAMENES_CACHE = {};
+    exSnap.docs.forEach(function(d) { EXAMENES_CACHE[d.id] = d.data(); });
+    renderTablaExamenes();
+  }).catch(function(e) {
+    console.error('Examenes error:', e);
+    var tbody = document.getElementById('tbody-examenes');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#b91c1c;padding:24px;">Error: ' + e.message + '</td></tr>';
+  });
+}
+
+function renderTablaExamenes(filtro) {
+  var tbody = document.getElementById('tbody-examenes');
+  if (!tbody) return;
+  filtro = (filtro || '').toLowerCase().trim();
+
+  var conExamen = 0, sinExamen = 0;
+  CURSOS_CACHE.forEach(function(c) {
+    if (EXAMENES_CACHE[c.id] && EXAMENES_CACHE[c.id].preguntas && EXAMENES_CACHE[c.id].preguntas.length > 0) conExamen++;
+    else sinExamen++;
+  });
+  var elCon = document.getElementById('ex-stat-con');
+  var elSin = document.getElementById('ex-stat-sin');
+  if (elCon) elCon.textContent = conExamen;
+  if (elSin) elSin.textContent = sinExamen;
+
+  var cursos = CURSOS_CACHE;
+  if (filtro) {
+    cursos = cursos.filter(function(c) {
+      return (c.titulo || '').toLowerCase().indexOf(filtro) >= 0;
+    });
+  }
+
+  if (cursos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sin cursos</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = cursos.map(function(c) {
+    var examen = EXAMENES_CACHE[c.id];
+    var tiene = examen && examen.preguntas && examen.preguntas.length > 0;
+    var badge = tiene
+      ? '<span class="status-badge status-activo">✅ ' + examen.preguntas.length + ' preguntas</span>'
+      : '<span class="status-badge" style="background:rgba(251,191,36,.15);color:#92400e;">⏳ Sin examen</span>';
+    var btnEditar = '<button class="btn-accion btn-ver-a" onclick="editarExamen(\'' + c.id + '\')">' + (tiene ? '✏️ Editar' : '➕ Crear') + '</button>';
+    var btnEliminar = tiene ? '<button class="btn-accion btn-desactivar" onclick="eliminarExamenRow(\'' + c.id + '\')">🗑</button>' : '';
+    return '<tr><td><div class="member-name">' + (c.emoji || '📚') + ' ' + escapeHtmlEx(c.titulo || c.id) + '</div></td><td>' + ((c.clases || []).length) + ' clases</td><td>' + badge + '</td><td><div class="action-btns">' + btnEditar + btnEliminar + '</div></td></tr>';
+  }).join('');
+}
+
+function filtrarCursosExamenes() {
+  var filtro = document.getElementById('ex-filter').value;
+  renderTablaExamenes(filtro);
+}
+
+function editarExamen(cursoId) {
+  EX_CURSO_ACTIVO = cursoId;
+  var curso = CURSOS_CACHE.find(function(c) { return c.id === cursoId; });
+  if (!curso) return;
+
+  var examen = EXAMENES_CACHE[cursoId];
+  EX_PREGUNTAS_WORK = examen && examen.preguntas ? JSON.parse(JSON.stringify(examen.preguntas)) : [];
+
+  document.getElementById('ex-vista-lista').style.display = 'none';
+  document.getElementById('ex-vista-editor').style.display = 'block';
+  document.getElementById('ex-editor-titulo').textContent = (curso.emoji || '📚') + ' ' + (curso.titulo || cursoId);
+  document.getElementById('ex-editor-meta').textContent = (curso.clases || []).length + ' clases · ID: ' + cursoId;
+  renderPreguntasEditor();
+}
+
+function volverListaExamenes() {
+  document.getElementById('ex-vista-lista').style.display = 'block';
+  document.getElementById('ex-vista-editor').style.display = 'none';
+  EX_CURSO_ACTIVO = null;
+  EX_PREGUNTAS_WORK = [];
+  cargarExamenesAdmin();
+}
+
+function renderPreguntasEditor() {
+  var cont = document.getElementById('ex-preguntas-container');
+  if (!cont) return;
+  if (EX_PREGUNTAS_WORK.length === 0) {
+    cont.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);background:var(--bg);border-radius:10px;border:1px dashed var(--border);">Sin preguntas. Importa un JSON o presiona "Agregar pregunta".</div>';
+    return;
+  }
+  var letras = ['A', 'B', 'C', 'D'];
+  cont.innerHTML = EX_PREGUNTAS_WORK.map(function(p, i) {
+    var opciones = p.opciones || ['', '', '', ''];
+    while (opciones.length < 4) opciones.push('');
+    var correcta = typeof p.correcta === 'number' ? p.correcta : 0;
+    var opcionesHtml = opciones.map(function(op, oi) {
+      return '<div style="display:grid;grid-template-columns:28px 1fr 90px;gap:8px;align-items:center;margin-bottom:6px;">' +
+        '<div style="text-align:center;font-weight:800;color:var(--muted);font-size:.82rem;">' + letras[oi] + '</div>' +
+        '<input type="text" value="' + escapeHtmlEx(op) + '" oninput="actualizarOpcionEx(' + i + ', ' + oi + ', this.value)" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.86rem;outline:none;">' +
+        '<label style="font-size:.76rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="radio" name="correcta-' + i + '" ' + (correcta === oi ? 'checked' : '') + ' onchange="marcarCorrectaEx(' + i + ', ' + oi + ')">Correcta</label>' +
+      '</div>';
+    }).join('');
+    return '<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-weight:800;color:var(--verde);font-size:.88rem;">Pregunta ' + (i + 1) + '</span>' +
+        '<button onclick="eliminarPreguntaEx(' + i + ')" style="background:rgba(239,68,68,.1);color:#b91c1c;border:none;padding:4px 10px;border-radius:100px;font-family:var(--font);font-size:.72rem;font-weight:700;cursor:pointer;">🗑 Quitar</button>' +
+      '</div>' +
+      '<textarea rows="2" oninput="actualizarPreguntaEx(' + i + ', this.value)" placeholder="Escribe la pregunta..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.9rem;resize:vertical;outline:none;margin-bottom:10px;">' + escapeHtmlEx(p.pregunta || '') + '</textarea>' +
+      opcionesHtml +
+    '</div>';
+  }).join('');
+}
+
+function actualizarPreguntaEx(idx, val) {
+  if (!EX_PREGUNTAS_WORK[idx]) return;
+  EX_PREGUNTAS_WORK[idx].pregunta = val;
+}
+
+function actualizarOpcionEx(idx, oi, val) {
+  if (!EX_PREGUNTAS_WORK[idx]) return;
+  if (!EX_PREGUNTAS_WORK[idx].opciones) EX_PREGUNTAS_WORK[idx].opciones = ['', '', '', ''];
+  EX_PREGUNTAS_WORK[idx].opciones[oi] = val;
+}
+
+function marcarCorrectaEx(idx, oi) {
+  if (!EX_PREGUNTAS_WORK[idx]) return;
+  EX_PREGUNTAS_WORK[idx].correcta = oi;
+}
+
+function agregarPreguntaExamen() {
+  EX_PREGUNTAS_WORK.push({ pregunta: '', opciones: ['', '', '', ''], correcta: 0 });
+  renderPreguntasEditor();
+}
+
+function eliminarPreguntaEx(idx) {
+  if (!confirm('¿Eliminar pregunta ' + (idx + 1) + '?')) return;
+  EX_PREGUNTAS_WORK.splice(idx, 1);
+  renderPreguntasEditor();
+}
+
+function importarExamenJSON() {
+  var txt = document.getElementById('ex-json-import').value.trim();
+  if (!txt) { showToast('Pega el JSON primero', 'error'); return; }
+  try {
+    var data = JSON.parse(txt);
+    if (!Array.isArray(data)) throw new Error('Debe ser un array');
+    for (var i = 0; i < data.length; i++) {
+      var p = data[i];
+      if (!p.pregunta || !Array.isArray(p.opciones) || typeof p.correcta !== 'number') {
+        throw new Error('Formato inválido en pregunta ' + (i + 1));
+      }
+    }
+    EX_PREGUNTAS_WORK = data;
+    document.getElementById('ex-json-import').value = '';
+    renderPreguntasEditor();
+    showToast('✅ ' + data.length + ' preguntas importadas');
+  } catch (e) {
+    showToast('JSON inválido: ' + e.message, 'error');
+  }
+}
+
+function guardarExamenAdmin() {
+  if (!EX_CURSO_ACTIVO) return;
+  if (EX_PREGUNTAS_WORK.length === 0) { showToast('No hay preguntas que guardar', 'error'); return; }
+
+  // Validar
+  for (var i = 0; i < EX_PREGUNTAS_WORK.length; i++) {
+    var p = EX_PREGUNTAS_WORK[i];
+    if (!p.pregunta || !p.pregunta.trim()) { showToast('Pregunta ' + (i + 1) + ' vacía', 'error'); return; }
+    if (!p.opciones || p.opciones.length < 2) { showToast('Pregunta ' + (i + 1) + ': mínimo 2 opciones', 'error'); return; }
+    if (p.opciones.some(function(op) { return !op || !op.trim(); })) { showToast('Pregunta ' + (i + 1) + ' tiene opciones vacías', 'error'); return; }
+    if (typeof p.correcta !== 'number' || p.correcta < 0 || p.correcta >= p.opciones.length) { showToast('Pregunta ' + (i + 1) + ': marca la correcta', 'error'); return; }
+  }
+
+  var curso = CURSOS_CACHE.find(function(c) { return c.id === EX_CURSO_ACTIVO; });
+  db.collection('examenes').doc(EX_CURSO_ACTIVO).set({
+    cursoId: EX_CURSO_ACTIVO,
+    cursoTitulo: curso ? curso.titulo : EX_CURSO_ACTIVO,
+    preguntas: EX_PREGUNTAS_WORK,
+    total: EX_PREGUNTAS_WORK.length,
+    actualizado: new Date().toISOString()
+  }).then(function() {
+    showToast('✅ Examen guardado (' + EX_PREGUNTAS_WORK.length + ' preguntas)');
+    EXAMENES_CACHE[EX_CURSO_ACTIVO] = { preguntas: EX_PREGUNTAS_WORK };
+    var s = document.getElementById('ex-save-status');
+    if (s) { s.style.display = 'inline'; setTimeout(function() { s.style.display = 'none'; }, 2500); }
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'error');
+  });
+}
+
+function eliminarExamenAdmin() {
+  if (!EX_CURSO_ACTIVO) return;
+  if (!confirm('¿Eliminar TODAS las preguntas del examen de este curso?')) return;
+  db.collection('examenes').doc(EX_CURSO_ACTIVO).delete().then(function() {
+    delete EXAMENES_CACHE[EX_CURSO_ACTIVO];
+    EX_PREGUNTAS_WORK = [];
+    renderPreguntasEditor();
+    showToast('🗑 Examen eliminado');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'error');
+  });
+}
+
+function eliminarExamenRow(cursoId) {
+  if (!confirm('¿Eliminar el examen de este curso?')) return;
+  db.collection('examenes').doc(cursoId).delete().then(function() {
+    delete EXAMENES_CACHE[cursoId];
+    renderTablaExamenes();
+    showToast('🗑 Examen eliminado');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'error');
+  });
+}
+
+function escapeHtmlEx(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+
+// Disparar carga cuando entra a la página
+(function() {
+  var origShowPage = window.showPage;
+  window.showPage = function(id, el) {
+    if (typeof origShowPage === 'function') origShowPage(id, el);
+    if (id === 'examenes-admin') cargarExamenesAdmin();
+  };
+})();
 </script>
 </body>
 </html>
