@@ -1425,7 +1425,7 @@ db.collection('miembros').onSnapshot(function(snap) {
       var sc = m.estado==='activo' ? 'status-activo' : m.estado==='pendiente' ? 'status-pendiente' : 'status-vencido';
       var sl = m.estado==='activo' ? '✅ Activo' : m.estado==='pendiente' ? '⏳ Pendiente' : '❌ Vencido';
       return '<tr><td><div class="member-name">'+(m.nombre||'—')+'</div><div class="member-email">'+(m.email||'')+'</div></td>'
-        +'<td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td>'
+        +'<td>'+(m.plan||'VIP')+'</td><td>'+formatearFechaVence(m.vence, m)+'</td>'
         +'<td><span class="status-badge '+sc+'">'+sl+'</span></td>'
         +'<td><div class="action-btns">'
         +'<button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button>'
@@ -1441,9 +1441,86 @@ db.collection('miembros').onSnapshot(function(snap) {
     var m = d.data();
     var sc = m.estado==='activo' ? 'status-activo' : m.estado==='pendiente' ? 'status-pendiente' : 'status-vencido';
     var sl = m.estado==='activo' ? '✅ Activo' : m.estado==='pendiente' ? '⏳ Pendiente' : '❌ Vencido';
-    return '<tr><td><div class="member-name">'+m.nombre+'</div><div class="member-email">'+m.email+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+(m.vence||'—')+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
+    return '<tr><td><div class="member-name">'+(m.nombre||'—')+'</div><div class="member-email">'+(m.email||'')+'</div></td><td>'+(m.whatsapp||'—')+'</td><td>'+(m.plan||'VIP')+'</td><td>'+formatearFechaVence(m.vence, m)+'</td><td><span class="status-badge '+sc+'">'+sl+'</span></td><td><div class="action-btns"><button class="btn-accion btn-activar" onclick="cambiarEstado(\''+d.id+'\',\'activo\')">Activar</button><button class="btn-accion btn-desactivar" onclick="cambiarEstado(\''+d.id+'\',\'inactivo\')">Desactivar</button></div></td></tr>';
   }).join('');
 });
+
+// ═══════════════════════════════════════════════════════════════
+// 📅 HELPER ROBUSTO PARA FORMATEAR FECHA DE VENCIMIENTO
+// Soporta: string ya formateado, ISO, Date object, Timestamp Firestore (con/sin .toDate),
+// número (segundos o milisegundos), null, undefined, y como fallback calcula desde
+// ultimoPago/fechaRegistro + plan.
+// ═══════════════════════════════════════════════════════════════
+function formatearFechaVence(val, miembroCompleto) {
+  // 1) Si ya está formateada (string en español)
+  if (typeof val === 'string') {
+    var v = val.trim();
+    if (!v) return calcularVenceFallback(miembroCompleto);
+    // Si ya viene formateada en español ("17 de mayo de 2026"), devolverla tal cual
+    if (/de\s+\w+\s+de\s+\d{4}/i.test(v)) return v;
+    // Intentar parsear como ISO o formato libre
+    var d1 = new Date(v);
+    if (!isNaN(d1.getTime()) && d1.getFullYear() > 1971) {
+      return d1.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+    }
+    return calcularVenceFallback(miembroCompleto);
+  }
+
+  // 2) Timestamp de Firestore (objeto con .toDate())
+  if (val && typeof val === 'object' && typeof val.toDate === 'function') {
+    try {
+      return val.toDate().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+    } catch(e) {}
+  }
+
+  // 3) Timestamp serializado de Firestore ({ seconds, nanoseconds })
+  if (val && typeof val === 'object' && typeof val.seconds === 'number') {
+    try {
+      return new Date(val.seconds * 1000).toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+    } catch(e) {}
+  }
+
+  // 4) Date object directo
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return val.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  // 5) Número (milisegundos o segundos)
+  if (typeof val === 'number' && val > 0) {
+    var ms = val < 10000000000 ? val * 1000 : val; // si < 10^10, son segundos
+    var d2 = new Date(ms);
+    if (!isNaN(d2.getTime())) {
+      return d2.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+    }
+  }
+
+  // 6) Fallback: calcular desde otros campos
+  return calcularVenceFallback(miembroCompleto);
+}
+
+function calcularVenceFallback(m) {
+  if (!m) return '—';
+  // Si está activo pero sin fecha → "Procesando..." (mejor que "Invalid Date")
+  if (m.estado === 'activo') {
+    // Intentar calcular desde ultimoPago o fechaRegistro + plan
+    var base = m.ultimoPago || m.fechaRegistro || m.createdAt;
+    if (base) {
+      var baseDate = null;
+      if (typeof base === 'string') baseDate = new Date(base);
+      else if (base && typeof base.toDate === 'function') baseDate = base.toDate();
+      else if (base && typeof base.seconds === 'number') baseDate = new Date(base.seconds * 1000);
+      else if (base instanceof Date) baseDate = base;
+
+      if (baseDate && !isNaN(baseDate.getTime())) {
+        var diasASumar = (m.plan && /anual/i.test(m.plan)) ? 365 : 30;
+        var venceCalc = new Date(baseDate.getTime() + diasASumar * 24 * 60 * 60 * 1000);
+        return venceCalc.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      }
+    }
+    return '<span style="color:#f59e0b;font-style:italic;">Procesando...</span>';
+  }
+  return '—';
+}
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 // Cargar config al iniciar
